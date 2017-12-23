@@ -5,13 +5,16 @@
  *      Author: lirongazit
  */
 
-//#include "Register.c"
-//#include "Memory.c"
-#include "ReservationStation.c"
+#include "CPU.c"
 
-#define REGISTER_NUM 16
 int main(int argc, char* argv[]){
-
+	if(argc != 7){
+		return -1;
+	}
+	CPU c = initCPU(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+	runCPU(c);
+	destroyCPU(c);
+/*
 	int i=0;
 	float f;
 	Register regs[REGISTER_NUM];
@@ -28,15 +31,14 @@ int main(int argc, char* argv[]){
 		int resGet=getTag(regs[i],&s);
 		printf("Tag: %s valid: %d\n",s, isValid(regs[i]));
 	}
+	char *filenameout = "./regout333.txt";
+	createRegout(filenameout,regs);
 
-
-
-	 /* Check Memory
 	char *filename = "./all_inst/memin.txt" ;
 	char *filenameout = "./all_inst/memout2.txt" ;
 	importMemory(filename);
 	exportMemory(filenameout);
-	  */
+
 
 	ReservationStation r = initStation("dor");
 	printf("isBusy BeforFill: %d\n", isBusy(r));
@@ -46,5 +48,5 @@ int main(int argc, char* argv[]){
 	printf("r->imm : %d\n", r->imm);
 	//sschar* temp;
 	//getRktag(r);
-	printf("r->tag : %s\n", r->Rktag);
+	printf("r->tag : %s\n", r->Rktag);*/
 }

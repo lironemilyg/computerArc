@@ -41,6 +41,9 @@ Instruction initInstruction(int index,int instruction){
 	return i;
 }
 
+void destroyInstruction(Instruction i){
+	free(i);
+}
 
 int getIndex(Instruction i){
 	return i->index;
@@ -108,6 +111,10 @@ void setWriteCDBCycle(Instruction i, int cycle){
 
 char* getStationName(Instruction i){
 	return i->stationName;
+}
+
+void setStationName(Instruction i, char * name){
+	i->stationName = name;
 }
 
 

@@ -12,12 +12,14 @@
 typedef struct instructionNode{
 	Instruction inst;
 	struct instructionNode* next;
+	struct instructionNode* prev;
 }*InstructionNode;
 
 typedef struct instructionQueue{
 	InstructionNode nonIssueInsts;
 	InstructionNode issueInsts;
 	InstructionNode nonIssueInstsTail;
+	InstructionNode issueInstsTail;
 	int nonIssueSize;
 	int issueSize;
 }*InstructionQueue;
@@ -31,13 +33,15 @@ InstructionQueue initInstructionQueue(){
 	return queue;
 }
 
-int addInstruction(InstructionQueue q, Instruction i){
+int addInstruction(InstructionQueue q, int index, int instFromMem){
 	if(q->nonIssueSize >= MAX_INST_QUEUE)
 		return 0;
 	q->nonIssueSize++;
 	InstructionNode in = (InstructionNode)malloc(sizeof(InstructionNode*));
 	if(in == NULL)
 		return 0;
+	Instruction i = initInstruction(index, instFromMem);
+	in->prev = NULL;
 	in->inst = i;
 	if(q->nonIssueSize == 1){
 		q->nonIssueInsts = in;
@@ -46,11 +50,73 @@ int addInstruction(InstructionQueue q, Instruction i){
 	}
 	else{
 		in->next = q->nonIssueInsts;
+		q->nonIssueInsts->prev = in;
 		q->nonIssueInsts = in;
 	}
 	return 1;
 }
 
-int issueInstruction(){
+int addIssueInstruction(InstructionQueue q, InstructionNode in){
+	q->issueSize++;
+	in->prev = NULL;
+	if(q->issueSize == 1){
+		q->issueInsts = in;
+		q->issueInstsTail = in;
+		in->next = NULL;
+	}
+	else{
+		in->next = q->issueInsts;
+		q->issueInsts->prev = in;
+		q->issueInsts = in;
+	}
+	return 1;
+}
 
+Instruction getNonIssuedInstruction(InstructionQueue q){
+	return q->nonIssueInstsTail->inst;
+}
+
+Instruction getIssuedInstructionByIndex(InstructionQueue q, int index){
+	InstructionNode curr = q->issueInsts;
+	while(curr != NULL){
+		if(getIndex(curr->inst) == index){
+			return curr->inst;
+		}
+		curr = curr->next;
+	}
+	return NULL;
+}
+
+InstructionNode removeFromIssuedQueue(InstructionQueue q){
+	InstructionNode curr = q->issueInstsTail;
+	if(curr == NULL){
+		return NULL;
+	}
+	q->nonIssueInstsTail = curr->prev;
+	curr->prev->next = NULL;
+	curr->prev = NULL;
+	q->issueSize--;
+	return curr;
+}
+
+InstructionNode removeFromNonIssuedQueue(InstructionQueue q){
+	InstructionNode curr = q->nonIssueInstsTail;
+	q->nonIssueInstsTail = curr->prev;
+	curr->prev->next = NULL;
+	curr->prev = NULL;
+	q->nonIssueSize--;
+	return curr;
+}
+
+void destroyNode(InstructionNode inst){
+	destroyInstruction(inst->inst);
+	free(inst);
+}
+
+void destroyInstructionQueue(InstructionQueue q){
+	if(q != NULL){
+		free(q->nonIssueInsts);
+		free(q->issueInsts);
+		free(q);
+	}
 }

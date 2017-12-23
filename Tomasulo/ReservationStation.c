@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "Register.c"
-#include "Instruction.c"
+#include "InstructionQueue.c"
 
 #define MAX_STRING 1000;
 typedef struct station{
@@ -37,6 +37,18 @@ ReservationStation initStation(char* stationName){
 	return rs;
 }
 
+char* getResStationName(ReservationStation r){
+	return r->name;
+}
+
+float getValuej(ReservationStation r){
+	return r->RjVal;
+}
+
+float getValuek(ReservationStation r){
+	return r->RkVal;
+}
+
 int isBusy(ReservationStation r){
 	if(r == NULL)
 		return -1;
@@ -52,6 +64,7 @@ int getInExecution(ReservationStation r){
 int setInExecution(ReservationStation r){
 	if(r == NULL)
 		return -1;
+	r->ready = 0;
 	r->inExecution = 1;
 	return 1;
 }
@@ -146,3 +159,15 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 	return 1;
 }
 
+int getIndexFromRsStation(ReservationStation r){
+	return r->index;
+}
+
+void destroyReservationStation(ReservationStation r){
+	if(r != NULL){
+		free(r->Rjtag);
+		free(r->Rktag);
+		free(r->name);
+		free(r);
+	}
+}

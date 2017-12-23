@@ -37,6 +37,9 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	int i = 0;
 	int totalSize = add_nr_reservations + mul_nr_reservations + div_nr_reservations + mem_nr_load_buffers + mem_nr_store_buffers;
 	ReservationStationTable rst = (ReservationStationTable)malloc(sizeof(ReservationStation)*totalSize + sizeof(int)*5);
+	if(!rst){
+		return NULL;
+	}
 	rst->addStationsInUse = 0;
 	rst->mulStationsInUse = 0;
 	rst->divStationsInUse = 0;
@@ -77,9 +80,10 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 		sprintf(name,"STORE_%d",i);
 		rst->storeBuffer[i] = initStation(name);
 	}
+	return rst;
 }
 
-int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU = 0){
+int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU){
 	int j = 0;
 	for(j = 0; j < rst->numOfAddStations; j++){
 		updateStation(rst->addStations[j],i);
@@ -124,4 +128,117 @@ int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU = 0){
 		}
 	}
 	return 0;
+}
+
+void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instruction inst, Register* regs){
+	int opcode = getOpcode(inst);
+	int imm = getImm(inst);
+	int index = getIndex(inst);
+	switch(opcode){
+		case LD:
+			fillStation(rst->loadBuffer[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
+			rst->loadBufferInUse++;
+			setStationName(inst,getResStationName(rst->loadBuffer[freeStationIndex]));
+			break;
+		case ST:
+			fillStation(rst->storeBuffer[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
+			rst->storeBufferInUse++;
+			setStationName(inst,getResStationName(rst->storeBuffer[freeStationIndex]));
+			break;
+		case MULT:
+			fillStation(rst->mulStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
+			rst->mulStationsInUse++;
+			setStationName(inst,getResStationName(rst->mulStations[freeStationIndex]));
+			break;
+		case DIV:
+			fillStation(rst->divStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
+			rst->divStationsInUse++;
+			setStationName(inst,getResStationName(rst->divStations[freeStationIndex]));
+			break;
+		case ADD:
+			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
+			rst->addStationsInUse++;
+			setStationName(inst,getResStationName(rst->addStations[freeStationIndex]));
+			break;
+		case SUB:
+			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
+			rst->addStationsInUse++;
+			setStationName(inst,getResStationName(rst->addStations[freeStationIndex]));
+			break;
+	}
+
+	if(opcode != ST){
+		setTag(regs[getRi(inst)],getStationName(inst));
+	}
+}
+
+int isStationFree(ReservationStationTable rst, int opcode){
+	int i;
+	switch(opcode){
+		case LD:
+			for(i = 0; i < rst->numOfLoadBuffer; i++){
+				if(!isBusy(rst->loadBuffer[i])){
+					return i;
+				}
+			}
+			break;
+		case ST:
+			for(i = 0; i < rst->numOfStoreBuffer; i++){
+				if(!isBusy(rst->storeBuffer[i])){
+					return i;
+				}
+			}
+			break;
+		case ADD:
+			for(i = 0; i < rst->numOfAddStations; i++){
+				if(!isBusy(rst->addStations[i])){
+					return i;
+				}
+			}
+			break;
+		case SUB:
+			for(i = 0; i < rst->numOfAddStations; i++){
+				if(!isBusy(rst->addStations[i])){
+					return i;
+				}
+			}
+			break;
+		case MULT:
+			for(i = 0; i < rst->numOfMulStations; i++){
+				if(!isBusy(rst->mulStations[i])){
+					return i;
+				}
+			}
+			break;
+		case DIV:
+			for(i = 0; i < rst->numOfDivStations; i++){
+				if(!isBusy(rst->divStations[i])){
+					return i;
+				}
+			}
+			break;
+	}
+	return -1;
+}
+
+void destroyReservationStationTable(ReservationStationTable rst){
+	if(rst != NULL){
+		int j = 0;
+		for(j = 0; j < rst->numOfAddStations; j++){
+			destroyReservationStation(rst->addStations[j]);
+		}
+		for(j = 0; j < rst->numOfMulStations; j++){
+			destroyReservationStation(rst->mulStations[j]);
+		}
+		for(j = 0; j < rst->numOfDivStations; j++){
+			destroyReservationStation(rst->divStations[j]);
+		}
+		for(j = 0; j < rst->numOfLoadBuffer; j++){
+			destroyReservationStation(rst->loadBuffer[j]);
+		}
+		for(j = 0; j < rst->numOfStoreBuffer; j++){
+			destroyReservationStation(rst->storeBuffer[j]);
+		}
+		free(rst);
+	}
 }
