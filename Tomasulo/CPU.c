@@ -539,7 +539,7 @@ void runCPU(CPU c){
 	//fflush(NULL);
 
 	exportMemory(c->memout);
-	createRegout(c);
+	//createRegout(c);
 	createTraceinst(c);
 
 	printf("Simulation Done!!!!\n");
