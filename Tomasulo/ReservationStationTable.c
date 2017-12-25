@@ -102,7 +102,6 @@ int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU){
 	for(j = 0; j < rst->numOfStoreBuffer; j++){
 		updateStation(rst->storeBuffer[j],i);
 	}
-/*
 	int opcode = getOpcode(i);
 	switch(opcode){
 		case LD:
@@ -129,7 +128,7 @@ int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU){
 		if (rst->loadBufferInUse == 0 && rst->storeBufferInUse == 0 && rst->addStationsInUse == 0 && rst->mulStationsInUse == 0 && rst->divStationsInUse == 0) {
 			return 1;
 		}
-	}*/
+	}
 	return 0;
 }
 

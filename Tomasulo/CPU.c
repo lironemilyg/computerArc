@@ -199,7 +199,6 @@ void writeCDB(CPU c){
 			cnt++;
 
 			readCDB(c->stations, in->inst, c->halt);
-			/*
 			getTag(c->regs[getRi(in->inst)], &tag);
 			if(tag != NULL && strcmp(tag, getStationName(in->inst)) == 0){
 				setValue(c->regs[getRi(in->inst)], getResult(in->inst));
@@ -231,7 +230,7 @@ void writeCDB(CPU c){
 					writeToTraceCDB(fTraceCDB, in, c->cycle, "DIV");
 					c->div_in_use--;
 					break;
-			}*/
+			}
 		}
 		in = in->prev;
 	}

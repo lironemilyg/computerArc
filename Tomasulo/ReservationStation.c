@@ -34,6 +34,8 @@ ReservationStation initStation(char* stationName){
 	rs->busy = 0;
 	rs->ready = 0;
 	rs->opcode = -1;
+	rs->Rjtag = "";
+	rs->Rktag = "";
 	rs->RjTagValid = 0;
 	rs->RkTagValid = 0;
 	return rs;
