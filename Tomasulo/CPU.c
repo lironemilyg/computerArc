@@ -285,26 +285,28 @@ void executeReadyAddSubInst(CPU c){
 	for(i = 0; i < c->stations->numOfAddStations; i++){
 		printf("in executeReadyAddSubInst- station %d - DEBUG 2\n",i);
 		fflush(NULL);
-		if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
+		/*if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->addStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
 				setInExecution(c->stations->addStations[i]);
 				execute(c, inst, getValuej(c->stations->addStations[i]), getValuek(c->stations->addStations[i]));
 			}
-		}
+		}*/
 	}
 }
 
 void executeReadyMulInst(CPU c){
 	int i = 0;
 	for(i = 0; i < c->stations->numOfMulStations; i++){
-		if(isBusy(c->stations->mulStations[i]) && getIsReady(c->stations->mulStations[i]) && c->mul_nr_units > c->mul_in_use){
+		printf("in executeReadyMulInst- station %d - DEBUG 2\n",i);
+		fflush(NULL);
+		/*if(isBusy(c->stations->mulStations[i]) && getIsReady(c->stations->mulStations[i]) && c->mul_nr_units > c->mul_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->mulStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
 				setInExecution(c->stations->mulStations[i]);
 				execute(c, inst, getValuej(c->stations->mulStations[i]), getValuek(c->stations->mulStations[i]));
 			}
-		}
+		}*/
 	}
 }
 
@@ -519,14 +521,14 @@ void runCPU(CPU c){
 		/*
 		printf("in runCPU- before startExecution %d - DEBUG 2\n",c->cycle);
 		fflush(NULL);*/
-
-		//startExecution(c);
 		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[0]->index, c->stations->addStations[0]->busy, c->stations->addStations[0]->ready, c->stations->addStations[0]->opcode, c->stations->addStations[0]->name);
 		fflush(NULL);
 		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[1]->index, c->stations->addStations[1]->busy, c->stations->addStations[1]->ready, c->stations->addStations[1]->opcode, c->stations->addStations[1]->name);
 		fflush(NULL);
 		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->mulStations[0]->index, c->stations->mulStations[0]->busy, c->stations->mulStations[0]->ready, c->stations->mulStations[0]->opcode, c->stations->mulStations[0]->name);
 		fflush(NULL);
+		startExecution(c);
+
 		/*
 		writeCDB(c);
 		printf("in runCPU- after writeCDB %d - DEBUG 2\n",c->cycle);
@@ -535,10 +537,10 @@ void runCPU(CPU c){
 	//}
 	//printf("in runCPU- after while- DEBUG 2\n");
 	//fflush(NULL);
-	/*
-	exportMemory(c->memout);
-	createRegout(c);
+
+	//exportMemory(c->memout);
+	//createRegout(c);
 	createTraceinst(c);
-	*/
+
 	printf("Simulation Done!!!!\n");
 }

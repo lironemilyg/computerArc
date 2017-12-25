@@ -54,15 +54,15 @@ int addInstruction(InstructionQueue q, int index, int instFromMem){
 		q->nonIssueInsts = in;
 	}
 	/*printf("in addInstruction- %08X - DEBUG\n", i->instruction);
-			fflush(NULL);
+			//fflush(NULL);
 			printf("in addInstruction- %08X - DEBUG\n", in->inst->instruction);
-					fflush(NULL);*/
+					//fflush(NULL);*/
 	return 1;
 }
 
 int addIssueInstruction(InstructionQueue q, InstructionNode in){
 	//printf("in addIssueInstruction  -  %08X - DEBUG\n", in->inst->instruction);
-	//fflush(NULL);
+	////fflush(NULL);
 	q->issueSize++;
 	in->prev = NULL;
 	if(q->issueSize == 1){
@@ -76,7 +76,7 @@ int addIssueInstruction(InstructionQueue q, InstructionNode in){
 		q->issueInsts = in;
 	}
 	//printf("in addIssueInstruction - end -  %08X - DEBUG\n", q->issueInsts->inst->instruction);
-	//	fflush(NULL);
+	//	//fflush(NULL);
 	return 1;
 }
 
@@ -118,7 +118,7 @@ InstructionNode removeFromNonIssuedQueue(InstructionQueue q){
 	}
 	q->nonIssueSize--;
 	//printf("in removeFromNonIssuedQueue - -  %08X - DEBUG\n", curr->inst->instruction);
-	//		fflush(NULL);
+	//		//fflush(NULL);
 	return curr;
 }
 

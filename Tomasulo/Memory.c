@@ -19,7 +19,7 @@ float mem[MEMORY_SIZE];
 int importMemory(char* filename){
 	FILE *fMem;
 	int nRead = 0;
-	uint32_t num;
+	unsigned int num;
     float f;
     int memIndex = 0;
     size_t buff_size = BUFF_SIZE;
