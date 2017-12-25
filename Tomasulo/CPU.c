@@ -201,8 +201,7 @@ void writeCDB(CPU c){
 	while(in != NULL && cnt < 5){
 		if(getWriteCDBCycle(in->inst) == c->cycle){
 			cnt++;
-
-			readCDB(c->stations, in->inst, c->halt);
+			c->done = readCDB(c->stations, in->inst, c->halt);
 			getTag(c->regs[getRi(in->inst)], &tag);
 			printf("in WriteCDB is valid: %d tag: %s stationName: %s - DEBUG\n", isValid(c->regs[getRi(in->inst)]), tag, getStationName(in->inst));
 			fflush(NULL);
@@ -515,7 +514,7 @@ void runCPU(CPU c){
 	fflush(NULL);
 	printf("in runCPU- after addInstruction - DEBUG 2\n");
 	fflush(NULL);*/
-	while(/*c->done == 0*/ c->cycle < 10){
+	while(/*c->done == 0 */c->cycle < 10){
 		c->cycle++;
 		//printf("in runCPU- in while %d - DEBUG 2\n",c->cycle);
 		//fflush(NULL);
@@ -541,8 +540,8 @@ void runCPU(CPU c){
 		fflush(NULL);
 
 	}
-	//printf("in runCPU- after while- DEBUG 2\n");
-	//fflush(NULL);
+	printf("in runCPU- after while- DEBUG 2\n");
+	fflush(NULL);
 
 	exportMemory(c->memout);
 	createRegout(c);
