@@ -209,7 +209,7 @@ void writeCDB(CPU c){
 				printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
 				fflush(NULL);
 				setValue(c->regs[getRi(in->inst)], getResult(in->inst));
-
+				setTag(c->regs[getRi(in->inst)], NULL);
 			}
 			opcode = getOpcode(in->inst);
 			switch(opcode){
