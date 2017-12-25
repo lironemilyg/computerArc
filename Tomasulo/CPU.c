@@ -538,8 +538,8 @@ void runCPU(CPU c){
 	//printf("in runCPU- after while- DEBUG 2\n");
 	//fflush(NULL);
 
-	//exportMemory(c->memout);
-	//createRegout(c);
+	exportMemory(c->memout);
+	createRegout(c);
 	createTraceinst(c);
 
 	printf("Simulation Done!!!!\n");
