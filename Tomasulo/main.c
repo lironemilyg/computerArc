@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
 	printf("After Inir CPU - DEBUG 1\n");
 	fflush(NULL);
 	runCPU(c);
-	//destroyCPU(c);
+	destroyCPU(c);
 /*
 	int i=0;
 	float f;
