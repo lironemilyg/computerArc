@@ -135,7 +135,7 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 	int i;
 	//ReservationStationTable stations;
 	InstructionQueue queue;
-	CPU c = (CPU)malloc(sizeof(CPU*)+sizeof(char)*3000);
+	CPU c = (CPU)malloc(sizeof(CPU*)+sizeof(char)*300);
 	if(c == NULL){
 		return c;
 	}
