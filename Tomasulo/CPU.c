@@ -183,6 +183,8 @@ void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBN
 
 void writeCDB(CPU c){
 	FILE *fTraceCDB;
+	printf("in enter -  DEBUG\n");
+	fflush(NULL);
 	if(c->traceCDB == NULL){ //check for valid filename
 		return;
 	}
@@ -194,13 +196,19 @@ void writeCDB(CPU c){
 	int opcode;
 	char* tag;
 	int cnt = 0;
+	printf("getWriteCDBCycle(in->inst): %d \n", getWriteCDBCycle(in->inst));
+	fflush(NULL);
 	while(in != NULL && cnt < 5){
 		if(getWriteCDBCycle(in->inst) == c->cycle){
 			cnt++;
 
 			readCDB(c->stations, in->inst, c->halt);
 			getTag(c->regs[getRi(in->inst)], &tag);
-			if(tag != NULL && strcmp(tag, getStationName(in->inst)) == 0){
+			printf("in WriteCDB is valid: %d tag: %s stationName: %s - DEBUG\n", isValid(c->regs[getRi(in->inst)]), tag, getStationName(in->inst));
+			fflush(NULL);
+			if((!isValid(c->regs[getRi(in->inst)])) && strcmp(tag, getStationName(in->inst)) == 0){
+				printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
+				fflush(NULL);
 				setValue(c->regs[getRi(in->inst)], getResult(in->inst));
 			}
 			opcode = getOpcode(in->inst);
@@ -291,8 +299,6 @@ void execute(CPU c, Instruction i,float Vj, float Vk){
 void executeReadyAddSubInst(CPU c){
 	int i = 0;
 	for(i = 0; i < c->stations->numOfAddStations; i++){
-		printf("in executeReadyAddSubInst- station %d - DEBUG 2\n",i);
-		fflush(NULL);
 		if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->addStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
@@ -407,8 +413,11 @@ int executeReadyLoadStoreInst(CPU c){
 }
 
 void startExecution(CPU c){
-	if(c->add_in_use < c->add_nr_units)
+	if(c->add_in_use < c->add_nr_units){
+		printf("in startExecution - START ADD DEBUG \n");
+		fflush(NULL);
 		executeReadyAddSubInst(c);
+	}
 	if(c->mul_in_use < c->mul_nr_units)
 		executeReadyMulInst(c);
 	if(c->div_in_use < c->div_nr_units)
@@ -508,33 +517,22 @@ void runCPU(CPU c){
 	fflush(NULL);*/
 	while(/*c->done == 0*/ c->cycle < 10){
 		c->cycle++;
-		printf("in runCPU- in while %d - DEBUG 2\n",c->cycle);
-		fflush(NULL);
-		issueInstruction(c);
-		//printf("in runCPU - after issueInstruction -  %08X - DEBUG\n", c->queue->issueInsts->inst->instruction);
+		//printf("in runCPU- in while %d - DEBUG 2\n",c->cycle);
 		//fflush(NULL);
 		issueInstruction(c);
-		//printf("in runCPU - after issueInstruction -  %08X - DEBUG\n", c->queue->issueInsts->inst->instruction);
-		//fflush(NULL);
+		issueInstruction(c);
 		if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 			pc++;
 		}
-		//printf("in runCPU after addInstruction- %08X - DEBUG\n", c->queue->nonIssueInsts->inst->instruction);
-		//					fflush(NULL);
 		if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 			pc++;
 		}
-		//printf("in runCPU after addInstruction- %08X - DEBUG\n", c->queue->nonIssueInsts->inst->instruction);
+		//printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[0]->index, c->stations->addStations[0]->busy, c->stations->addStations[0]->ready, c->stations->addStations[0]->opcode, c->stations->addStations[0]->name);
 		//fflush(NULL);
-		/*
-		printf("in runCPU- before startExecution %d - DEBUG 2\n",c->cycle);
-		fflush(NULL);*/
-		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[0]->index, c->stations->addStations[0]->busy, c->stations->addStations[0]->ready, c->stations->addStations[0]->opcode, c->stations->addStations[0]->name);
-		fflush(NULL);
-		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[1]->index, c->stations->addStations[1]->busy, c->stations->addStations[1]->ready, c->stations->addStations[1]->opcode, c->stations->addStations[1]->name);
-		fflush(NULL);
-		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->mulStations[0]->index, c->stations->mulStations[0]->busy, c->stations->mulStations[0]->ready, c->stations->mulStations[0]->opcode, c->stations->mulStations[0]->name);
-		fflush(NULL);
+		//printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[1]->index, c->stations->addStations[1]->busy, c->stations->addStations[1]->ready, c->stations->addStations[1]->opcode, c->stations->addStations[1]->name);
+		//fflush(NULL);
+		//printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->mulStations[0]->index, c->stations->mulStations[0]->busy, c->stations->mulStations[0]->ready, c->stations->mulStations[0]->opcode, c->stations->mulStations[0]->name);
+		//fflush(NULL);
 		startExecution(c);
 
 

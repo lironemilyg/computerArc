@@ -13,6 +13,7 @@
 typedef struct reg{
 	float val;
 	char* tag;
+	int rValid;
 }*Register;
 
 Register initRegister(int index){
@@ -21,6 +22,7 @@ Register initRegister(int index){
 		return r;
 	r->val = (float)index;
 	r->tag = NULL;
+	r->rValid = 1;
 	return r;
 }
 
@@ -36,9 +38,7 @@ void destroyRegister(Register r){
 
 int isValid(Register r){
 	if(r != NULL){
-		if(r->tag == NULL){
-			return 1;
-		}
+		return r->rValid;
 	}
 	return 0;
 }
@@ -69,14 +69,15 @@ int setValue(Register r, float val){
 
 int setTag(Register r, char* tag){
 	if(r != NULL){
-		if(r->tag){
+		if(r->tag == NULL){
 			free(r->tag);
-			r->tag = NULL;
+			r->rValid = 1;
 		}
 		if(tag != NULL){
 			size_t size = strlen(tag);
 			r->tag = (char*) malloc(size+1);
-			strncpy(r->tag,tag,size);
+			strncpy(r->tag,tag+'\0',size+1);
+			r->rValid = 0;
 		}
 		return 1;
 	}

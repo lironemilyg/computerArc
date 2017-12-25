@@ -100,7 +100,7 @@ char* getRktag(ReservationStation r){
 }
 
 void setIsReady(ReservationStation r){
-	if(r->Rjtag == NULL && r->Rktag == NULL)
+	if(r->RjTagValid == 0 && r->RkTagValid == 0)
 		r->ready = 1;
 	else
 		r->ready = 0;
