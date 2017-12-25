@@ -100,7 +100,7 @@ InstructionNode removeFromIssuedQueue(InstructionQueue q){
 	if(curr == NULL){
 		return NULL;
 	}
-	q->nonIssueInstsTail = curr->prev;
+	q->issueInstsTail = curr->prev;
 	if(curr->prev != NULL){
 		curr->prev->next = NULL;
 		curr->prev = NULL;
@@ -124,7 +124,7 @@ InstructionNode removeFromNonIssuedQueue(InstructionQueue q){
 
 void destroyNode(InstructionNode inst){
 	destroyInstruction(inst->inst);
-	free(inst);
+	//free(inst);
 }
 
 void destroyInstructionQueue(InstructionQueue q){

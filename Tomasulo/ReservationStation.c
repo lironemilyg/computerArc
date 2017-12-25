@@ -18,6 +18,8 @@ typedef struct station{
 	int opcode;
 	char* Rjtag;
 	char* Rktag;
+	int RjTagValid;
+	int RkTagValid;
 	float RjVal;
 	float RkVal;
 	int inExecution;
@@ -32,8 +34,8 @@ ReservationStation initStation(char* stationName){
 	rs->busy = 0;
 	rs->ready = 0;
 	rs->opcode = -1;
-	rs->Rjtag = NULL;
-	rs->Rktag = NULL;
+	rs->RjTagValid = 0;
+	rs->RkTagValid = 0;
 	return rs;
 }
 
@@ -69,16 +71,18 @@ int setInExecution(ReservationStation r){
 	return 1;
 }
 
-void changeTagj(ReservationStation r,int RjVal){
+void changeTagj(ReservationStation r, float RjVal){
 	r->RjVal = RjVal;
 	free(r->Rjtag);
-	r->Rjtag = NULL;
+	r->RjTagValid = 0;
+	//r->Rjtag = NULL;
 }
 
-void changeTagk(ReservationStation r,int RkVal){
+void changeTagk(ReservationStation r, float RkVal){
 	r->RkVal = RkVal;
 	free(r->Rktag);
-	r->Rktag = NULL;
+	r->RkTagValid = 0;
+	//r->Rktag = NULL;
 }
 
 int getIsReady(ReservationStation r){
@@ -102,6 +106,8 @@ void setIsReady(ReservationStation r){
 
 void emptyStation(ReservationStation r){
 	r->busy = 0;
+	r->RjTagValid = 0;
+	r->RkTagValid = 0;
 }
 
 void updateStation(ReservationStation r, Instruction i){
@@ -125,9 +131,9 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 	r->imm = imm;
 	if(isValid(j)){
 		getValue(j,&r->RjVal);
-		if(r->Rjtag != NULL)
+		if(r->RjTagValid != 0)
 			free(r->Rjtag);
-		r->Rjtag = NULL;
+		r->RjTagValid = 0;
 	}
 	else{
 		char* tempTag;
@@ -138,12 +144,13 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 		if(r->Rjtag == NULL)
 			return 0;
 		strcpy(r->Rjtag ,tempTag);
+		r->RjTagValid = 1;
 	}
 	if(isValid(k)){
 		getValue(k,&r->RkVal);
-		if(r->Rktag != NULL)
+		if(r->RkTagValid != 0)
 			free(r->Rktag);
-		r->Rktag = NULL;
+		r->RkTagValid = 0;
 	}
 	else{
 		char* tempTag;
@@ -154,6 +161,7 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 		if(r->Rktag == NULL)
 			return 0;
 		strcpy(r->Rktag ,tempTag);
+		r->RkTagValid = 1;
 	}
 	setIsReady(r);
 	return 1;
@@ -165,8 +173,10 @@ int getIndexFromRsStation(ReservationStation r){
 
 void destroyReservationStation(ReservationStation r){
 	if(r != NULL){
-		free(r->Rjtag);
-		free(r->Rktag);
+		if(r->RjTagValid)
+			free(r->Rjtag);
+		if(r->RkTagValid)
+			free(r->Rktag);
 		free(r->name);
 		free(r);
 	}

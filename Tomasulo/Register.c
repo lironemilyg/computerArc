@@ -29,8 +29,8 @@ void destroyRegister(Register r){
 		if(r->tag != NULL){
 			free(r->tag);
 		}
-		free(r);
-		r = NULL;
+		//free(r);
+		//r = NULL;
 	}
 }
 
