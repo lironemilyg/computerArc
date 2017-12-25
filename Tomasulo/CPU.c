@@ -135,7 +135,7 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 	int i;
 	//ReservationStationTable stations;
 	InstructionQueue queue;
-	CPU c = (CPU)malloc(sizeof(CPU*)+sizeof(char)*300);
+	CPU c = (CPU)malloc(sizeof(CPU*)+sizeof(char)*3000);
 	if(c == NULL){
 		return c;
 	}
@@ -166,7 +166,7 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 	}
 	ReservationStationTable stations = initReservationStationTable(c->add_nr_reservations, c->mul_nr_reservations, c->div_nr_reservations, c->mem_nr_load_buffers, c->mem_nr_store_buffers);
 	queue = initInstructionQueue();
-	c = (CPU)realloc(c,sizeof(*c) + sizeof(*stations) + sizeof(*queue));
+	//c = (CPU)realloc(c,sizeof(c) + sizeof(stations) + sizeof(queue));
 	c->stations = stations;
 	c->queue = queue;
 	return c;
