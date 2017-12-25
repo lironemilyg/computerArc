@@ -16,7 +16,7 @@ typedef struct reg{
 }*Register;
 
 Register initRegister(int index){
-	Register r = (Register)malloc(sizeof(Register*));
+	Register r = (Register)malloc(sizeof(Register*) + 8);
 	if(r == NULL)
 		return r;
 	r->val = (float)index;
