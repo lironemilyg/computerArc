@@ -95,7 +95,6 @@ int configCPU(CPU c){
 	int nRead = 0;
 	size_t buff_size = CONFIG_LINE_SIZE;
 	char* line = (char*)malloc(sizeof(char)*CONFIG_LINE_SIZE);
-	nRead = getline(&line, &buff_size, fCfp);
 	if(c->cfg == NULL){ //check for valid filename
 		return 0;
 	}
@@ -134,7 +133,7 @@ int configCPU(CPU c){
 
 CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst, char* traceCDB){
 	int i;
-	ReservationStationTable stations;
+	//ReservationStationTable stations;
 	InstructionQueue queue;
 	CPU c = (CPU)malloc(sizeof(CPU*)+sizeof(char)*300);
 	if(c == NULL){
@@ -160,11 +159,12 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 	c->write_cdb_mul = 0;
 	c->write_cdb_div =0;
 	c->write_cdb_mem = 0;
+
 	if(configCPU(c) == 0){
 		free(c);
 		return NULL;
 	}
-	stations = initReservationStationTable(c->add_nr_reservations, c->mul_nr_reservations, c->div_nr_reservations, c->mem_nr_load_buffers, c->mem_nr_store_buffers);
+	ReservationStationTable stations = initReservationStationTable(c->add_nr_reservations, c->mul_nr_reservations, c->div_nr_reservations, c->mem_nr_load_buffers, c->mem_nr_store_buffers);
 	queue = initInstructionQueue();
 	c = (CPU)realloc(c,sizeof(c) + sizeof(stations) + sizeof(queue));
 	c->stations = stations;
@@ -283,6 +283,8 @@ void execute(CPU c, Instruction i,float Vj, float Vk){
 void executeReadyAddSubInst(CPU c){
 	int i = 0;
 	for(i = 0; i < c->stations->numOfAddStations; i++){
+		printf("in executeReadyAddSubInst- station %d - DEBUG 2\n",i);
+		fflush(NULL);
 		if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->addStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
@@ -408,18 +410,23 @@ void startExecution(CPU c){
 int issueInstruction(CPU c){
 	int index;
 	Instruction inst = getNonIssuedInstruction(c->queue);
+	//printf("in issueInstruction - after getNonIssuedInstruction -  %08X - DEBUG\n", inst->instruction);
+	//	fflush(NULL);
 	if(getOpcode(inst) == HALT){
 		c->halt = 1;
 		destroyNode(removeFromNonIssuedQueue(c->queue));
-		destroyInstruction(inst);
 		return 1;
 	}
 	index = isStationFree(c->stations, getOpcode(inst));
+	//printf("in issueInstruction - after isStationFree -  %d - DEBUG\n", index);
+	//		fflush(NULL);
 	if(index == -1){
 		return 0;
 	}
 	setIssueCycle(inst, c->cycle);
 	addIssueInstruction(c->queue, removeFromNonIssuedQueue(c->queue));
+	//printf("in issueInstruction - after addIssueInstruction -  %d - DEBUG\n", index);
+	//			fflush(NULL);
 	insertInstruction(c->stations, index, inst, c->regs);
 	return 1;
 }
@@ -446,7 +453,6 @@ void createRegout(CPU c){
 
 void createTraceinst(CPU c){
 	FILE *fTraceinst;
-	int i = 0;
 	if(c->traceInst == NULL){ //check for valid filename
 		return;
 	}
@@ -475,30 +481,64 @@ void destroyCPU(CPU c){
 void runCPU(CPU c){
 	int pc = 0;
 	importMemory(c->memin);
-	if(addInstruction(c->queue, pc, getMemoryI(pc))){
+	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 		pc++;
 	}
 	else{
 		return;
 	}
-	if(addInstruction(c->queue, pc, getMemoryI(pc))){
+	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 		pc++;
 	}
-	while(c->done){
+	/*printf("in runCPU- pc %d - DEBUG 2\n",pc);
+	Instruction inst = c->queue->nonIssueInsts->inst;
+	printf("in runCPU- %08X %d %d %d %d %d - DEBUG\n", inst->instruction, inst->index, inst->issueCycle, inst->startExCycle, inst->endExCycle, inst->writeCDBCycle);
+	fflush(NULL);
+	printf("in runCPU- after addInstruction - DEBUG 2\n");
+	fflush(NULL);*/
+	//while(c->done == 0){
 		c->cycle++;
+		printf("in runCPU- in while %d - DEBUG 2\n",c->cycle);
+		fflush(NULL);
 		issueInstruction(c);
+		//printf("in runCPU - after issueInstruction -  %08X - DEBUG\n", c->queue->issueInsts->inst->instruction);
+		//fflush(NULL);
 		issueInstruction(c);
-		if(addInstruction(c->queue, pc, getMemoryI(pc))){
+		//printf("in runCPU - after issueInstruction -  %08X - DEBUG\n", c->queue->issueInsts->inst->instruction);
+		//fflush(NULL);
+		if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 			pc++;
 		}
-		if(addInstruction(c->queue, pc, getMemoryI(pc))){
+		//printf("in runCPU after addInstruction- %08X - DEBUG\n", c->queue->nonIssueInsts->inst->instruction);
+		//					fflush(NULL);
+		if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 			pc++;
 		}
-		startExecution(c);
+		//printf("in runCPU after addInstruction- %08X - DEBUG\n", c->queue->nonIssueInsts->inst->instruction);
+		//fflush(NULL);
+		/*
+		printf("in runCPU- before startExecution %d - DEBUG 2\n",c->cycle);
+		fflush(NULL);*/
+
+		//startExecution(c);
+		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[0]->index, c->stations->addStations[0]->busy, c->stations->addStations[0]->ready, c->stations->addStations[0]->opcode, c->stations->addStations[0]->name);
+		fflush(NULL);
+		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[1]->index, c->stations->addStations[1]->busy, c->stations->addStations[1]->ready, c->stations->addStations[1]->opcode, c->stations->addStations[1]->name);
+		fflush(NULL);
+		printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->mulStations[0]->index, c->stations->mulStations[0]->busy, c->stations->mulStations[0]->ready, c->stations->mulStations[0]->opcode, c->stations->mulStations[0]->name);
+		fflush(NULL);
+		/*
 		writeCDB(c);
-	}
+		printf("in runCPU- after writeCDB %d - DEBUG 2\n",c->cycle);
+		fflush(NULL);*/
+
+	//}
+	//printf("in runCPU- after while- DEBUG 2\n");
+	//fflush(NULL);
+	/*
 	exportMemory(c->memout);
 	createRegout(c);
 	createTraceinst(c);
-	printf("Simulation Done!!!!");
+	*/
+	printf("Simulation Done!!!!\n");
 }

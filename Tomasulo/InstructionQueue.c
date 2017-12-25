@@ -37,10 +37,10 @@ int addInstruction(InstructionQueue q, int index, int instFromMem){
 	if(q->nonIssueSize >= MAX_INST_QUEUE)
 		return 0;
 	q->nonIssueSize++;
-	InstructionNode in = (InstructionNode)malloc(sizeof(InstructionNode*));
+	Instruction i = initInstruction(index, instFromMem);
+	InstructionNode in = (InstructionNode)malloc(sizeof(InstructionNode*)+sizeof(*i));
 	if(in == NULL)
 		return 0;
-	Instruction i = initInstruction(index, instFromMem);
 	in->prev = NULL;
 	in->inst = i;
 	if(q->nonIssueSize == 1){
@@ -53,10 +53,16 @@ int addInstruction(InstructionQueue q, int index, int instFromMem){
 		q->nonIssueInsts->prev = in;
 		q->nonIssueInsts = in;
 	}
+	/*printf("in addInstruction- %08X - DEBUG\n", i->instruction);
+			fflush(NULL);
+			printf("in addInstruction- %08X - DEBUG\n", in->inst->instruction);
+					fflush(NULL);*/
 	return 1;
 }
 
 int addIssueInstruction(InstructionQueue q, InstructionNode in){
+	//printf("in addIssueInstruction  -  %08X - DEBUG\n", in->inst->instruction);
+	//fflush(NULL);
 	q->issueSize++;
 	in->prev = NULL;
 	if(q->issueSize == 1){
@@ -69,6 +75,8 @@ int addIssueInstruction(InstructionQueue q, InstructionNode in){
 		q->issueInsts->prev = in;
 		q->issueInsts = in;
 	}
+	//printf("in addIssueInstruction - end -  %08X - DEBUG\n", q->issueInsts->inst->instruction);
+	//	fflush(NULL);
 	return 1;
 }
 
@@ -93,8 +101,10 @@ InstructionNode removeFromIssuedQueue(InstructionQueue q){
 		return NULL;
 	}
 	q->nonIssueInstsTail = curr->prev;
-	curr->prev->next = NULL;
-	curr->prev = NULL;
+	if(curr->prev != NULL){
+		curr->prev->next = NULL;
+		curr->prev = NULL;
+	}
 	q->issueSize--;
 	return curr;
 }
@@ -102,9 +112,13 @@ InstructionNode removeFromIssuedQueue(InstructionQueue q){
 InstructionNode removeFromNonIssuedQueue(InstructionQueue q){
 	InstructionNode curr = q->nonIssueInstsTail;
 	q->nonIssueInstsTail = curr->prev;
-	curr->prev->next = NULL;
-	curr->prev = NULL;
+	if(curr->prev != NULL){
+		curr->prev->next = NULL;
+		curr->prev = NULL;
+	}
 	q->nonIssueSize--;
+	//printf("in removeFromNonIssuedQueue - -  %08X - DEBUG\n", curr->inst->instruction);
+	//		fflush(NULL);
 	return curr;
 }
 

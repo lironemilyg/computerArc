@@ -5,6 +5,8 @@
  *      Author: lirongazit
  */
 
+#include <stdlib.h>
+
 
 typedef struct instruction{
 	char* stationName;
@@ -37,7 +39,10 @@ Instruction initInstruction(int index,int instruction){
 	i->endExCycle = -1;
 	i->writeCDBCycle = -1;
 	i->index = index;
+	i->instruction = instruction;
 	decode(i, instruction);
+	printf("in initInstruction- %08X - DEBUG\n", i->instruction);
+			fflush(NULL);
 	return i;
 }
 

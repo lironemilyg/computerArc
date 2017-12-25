@@ -42,7 +42,6 @@ int importMemory(char* filename){
 		sscanf(hexStr, "%x", &num);  // assuming you checked input
 		f = *((float*)&num);
 		mem[memIndex] = f;
-		printf("the hexadecimal 0x%08x becomes %.3f as a float\n", num, f);
 		memIndex++;
 	}
 	free(hexStr);
@@ -70,6 +69,10 @@ int exportMemory(char* filename){
 
 float getMemoryI(int i){
 	return mem[i];
+}
+
+int getMemoryInstruction(int i){
+	return *(unsigned int*)&mem[i];
 }
 
 void setMemoryI(int i, float val){
