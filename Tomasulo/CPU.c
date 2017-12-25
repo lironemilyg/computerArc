@@ -166,7 +166,7 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 	}
 	ReservationStationTable stations = initReservationStationTable(c->add_nr_reservations, c->mul_nr_reservations, c->div_nr_reservations, c->mem_nr_load_buffers, c->mem_nr_store_buffers);
 	queue = initInstructionQueue();
-	//c = (CPU)realloc(c,sizeof(c) + sizeof(stations) + sizeof(queue));
+	c = (CPU)realloc(c,sizeof(*c) + sizeof(stations) + sizeof(queue) + 24);
 	c->stations = stations;
 	c->queue = queue;
 	return c;
