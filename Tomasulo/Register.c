@@ -31,8 +31,6 @@ void destroyRegister(Register r){
 		if(r->tag != NULL){
 			free(r->tag);
 		}
-		//free(r);
-		//r = NULL;
 	}
 }
 
@@ -80,6 +78,8 @@ int setTag(Register r, char* tag){
 			strncpy(r->tag,tag,size+1);
 			r->rValid = 0;
 		}
+		else
+			r->tag = NULL;
 		return 1;
 	}
 	return 0;

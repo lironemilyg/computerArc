@@ -196,7 +196,7 @@ void writeCDB(CPU c){
 	int opcode;
 	char* tag;
 	int cnt = 0;
-	printf("getWriteCDBCycle(in->inst): %d \n", getWriteCDBCycle(in->inst));
+	printf("getWriteCDBCycle(in->inst): %d    cycle %d\n", getWriteCDBCycle(c->queue->issueInsts->inst), c->cycle);
 	fflush(NULL);
 	while(in != NULL && cnt < 5){
 		if(getWriteCDBCycle(in->inst) == c->cycle){
@@ -209,6 +209,7 @@ void writeCDB(CPU c){
 				printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
 				fflush(NULL);
 				setValue(c->regs[getRi(in->inst)], getResult(in->inst));
+
 			}
 			opcode = getOpcode(in->inst);
 			switch(opcode){
@@ -426,26 +427,22 @@ void startExecution(CPU c){
 }
 
 int issueInstruction(CPU c){
-	int index;
-	Instruction inst = getNonIssuedInstruction(c->queue);
-	//printf("in issueInstruction - after getNonIssuedInstruction -  %08X - DEBUG\n", inst->instruction);
-	//	fflush(NULL);
-	if(getOpcode(inst) == HALT){
-		c->halt = 1;
-		destroyNode(removeFromNonIssuedQueue(c->queue));
-		return 1;
+	if(c->halt == 0){
+		int index;
+		Instruction inst = getNonIssuedInstruction(c->queue);
+		if(getOpcode(inst) == HALT){
+			c->halt = 1;
+			destroyNode(removeFromNonIssuedQueue(c->queue));
+			return 1;
+		}
+		index = isStationFree(c->stations, getOpcode(inst));
+		if(index == -1){
+			return 0;
+		}
+		setIssueCycle(inst, c->cycle);
+		addIssueInstruction(c->queue, removeFromNonIssuedQueue(c->queue));
+		insertInstruction(c->stations, index, inst, c->regs);
 	}
-	index = isStationFree(c->stations, getOpcode(inst));
-	//printf("in issueInstruction - after isStationFree -  %d - DEBUG\n", index);
-	//		fflush(NULL);
-	if(index == -1){
-		return 0;
-	}
-	setIssueCycle(inst, c->cycle);
-	addIssueInstruction(c->queue, removeFromNonIssuedQueue(c->queue));
-	//printf("in issueInstruction - after addIssueInstruction -  %d - DEBUG\n", index);
-	//			fflush(NULL);
-	insertInstruction(c->stations, index, inst, c->regs);
 	return 1;
 }
 
@@ -508,37 +505,20 @@ void runCPU(CPU c){
 	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 		pc++;
 	}
-	/*printf("in runCPU- pc %d - DEBUG 2\n",pc);
-	Instruction inst = c->queue->nonIssueInsts->inst;
-	printf("in runCPU- %08X %d %d %d %d %d - DEBUG\n", inst->instruction, inst->index, inst->issueCycle, inst->startExCycle, inst->endExCycle, inst->writeCDBCycle);
-	fflush(NULL);
-	printf("in runCPU- after addInstruction - DEBUG 2\n");
-	fflush(NULL);*/
-	while(/*c->done == 0 */c->cycle < 10){
+	while(c->done == 0 && c->cycle < 10){
 		c->cycle++;
-		//printf("in runCPU- in while %d - DEBUG 2\n",c->cycle);
-		//fflush(NULL);
 		issueInstruction(c);
 		issueInstruction(c);
-		if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
-			pc++;
+		if(c->halt == 0){
+			if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
+				pc++;
+			}
+			if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
+				pc++;
+			}
 		}
-		if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
-			pc++;
-		}
-		//printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[0]->index, c->stations->addStations[0]->busy, c->stations->addStations[0]->ready, c->stations->addStations[0]->opcode, c->stations->addStations[0]->name);
-		//fflush(NULL);
-		//printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->addStations[1]->index, c->stations->addStations[1]->busy, c->stations->addStations[1]->ready, c->stations->addStations[1]->opcode, c->stations->addStations[1]->name);
-		//fflush(NULL);
-		//printf("in runCPU- station %d %d %d %d %s- DEBUG 2\n",c->stations->mulStations[0]->index, c->stations->mulStations[0]->busy, c->stations->mulStations[0]->ready, c->stations->mulStations[0]->opcode, c->stations->mulStations[0]->name);
-		//fflush(NULL);
 		startExecution(c);
-
-
 		writeCDB(c);
-		printf("in runCPU- after writeCDB %d - DEBUG 2\n",c->cycle);
-		fflush(NULL);
-
 	}
 	printf("in runCPU- after while- DEBUG 2\n");
 	fflush(NULL);
