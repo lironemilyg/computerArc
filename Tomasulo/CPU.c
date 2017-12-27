@@ -50,16 +50,9 @@ typedef struct cpu{
 }*CPU;
 
 int max(int num1, int num2) {
-
-   /* local variable declaration */
-   int result;
-
    if (num1 > num2)
-      result = num1;
-   else
-      result = num2;
-
-   return result;
+      return num1;
+   return num2;
 }
 
 void trim(char* string){
@@ -162,7 +155,7 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 	c->traceCDB = traceCDB;
 	c->write_cdb_add = 0;
 	c->write_cdb_mul = 0;
-	c->write_cdb_div =0;
+	c->write_cdb_div = 0;
 	c->write_cdb_mem = 0;
 
 	if(configCPU(c) == 0){
@@ -183,8 +176,8 @@ void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBN
 
 void writeCDB(CPU c){
 	FILE *fTraceCDB;
-	printf("in enter -  DEBUG\n");
-	fflush(NULL);
+	//printf("in enter -  DEBUG\n");
+	//fflush(NULL);
 	if(c->traceCDB == NULL){ //check for valid filename
 		return;
 	}
@@ -196,18 +189,18 @@ void writeCDB(CPU c){
 	int opcode;
 	char* tag;
 	int cnt = 0;
-	printf("getWriteCDBCycle(in->inst): %d    cycle %d\n", getWriteCDBCycle(c->queue->issueInsts->inst), c->cycle);
-	fflush(NULL);
+	//printf("getWriteCDBCycle(in->inst): %d    cycle %d\n", getWriteCDBCycle(c->queue->issueInsts->inst), c->cycle);
+	//fflush(NULL);
 	while(in != NULL && cnt < 5){
 		if(getWriteCDBCycle(in->inst) == c->cycle){
 			cnt++;
 			c->done = readCDB(c->stations, in->inst, c->halt);
 			getTag(c->regs[getRi(in->inst)], &tag);
-			printf("in WriteCDB is valid: %d tag: %s stationName: %s - DEBUG\n", isValid(c->regs[getRi(in->inst)]), tag, getStationName(in->inst));
-			fflush(NULL);
+			//printf("in WriteCDB is valid: %d tag: %s stationName: %s - DEBUG\n", isValid(c->regs[getRi(in->inst)]), tag, getStationName(in->inst));
+			//fflush(NULL);
 			if((!isValid(c->regs[getRi(in->inst)])) && strcmp(tag, getStationName(in->inst)) == 0){
-				printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
-				fflush(NULL);
+				//printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
+				//fflush(NULL);
 				setValue(c->regs[getRi(in->inst)], getResult(in->inst));
 				setTag(c->regs[getRi(in->inst)], NULL);
 			}
@@ -265,30 +258,38 @@ void execute(CPU c, Instruction i,float Vj, float Vk){
 		case ADD:
 			c->add_in_use++;
 			setEndExCycle(i,c->cycle+c->add_delay -1);
-			c->write_cdb_add = max(c->cycle + c->mem_delay, c->write_cdb_add + 1);
+			printf("in execute add-  write_cdb_add %d c->cycle %d - DEBUG\n",c->write_cdb_add,c->cycle);
+			fflush(NULL);
+			c->write_cdb_add = max(c->cycle + c->add_delay, c->write_cdb_add + 1);
 			setWriteCDBCycle(i,c->write_cdb_add);
 			setResult(i,Vj+Vk);
+			//printf("in execute add- result is %f index is %d- DEBUG 2\n",i->result, i->index);
+			//		fflush(NULL);
 			break;
 		case SUB:
 			c->add_in_use++;
 			setEndExCycle(i,c->cycle+c->add_delay -1);
-			c->write_cdb_add = max(c->cycle + c->mem_delay, c->write_cdb_add + 1);
+			printf("in execute sub-  write_cdb_add %d c->cycle %d- DEBUG\n",c->write_cdb_add,c->cycle);
+			fflush(NULL);
+			c->write_cdb_add = max(c->cycle + c->add_delay, c->write_cdb_add + 1);
 			setWriteCDBCycle(i,c->write_cdb_add);
 			setResult(i,Vj-Vk);
-			printf("in execute- result is %f - DEBUG 2\n",i->result);
-					fflush(NULL);
+			//printf("in execute sub- result is %f index is %d- DEBUG 2\n",i->result, i->index);
+			//		fflush(NULL);
 			break;
 		case MULT:
 			c->mul_in_use++;
 			setEndExCycle(i,c->cycle+c->mul_delay -1);
-			c->write_cdb_mul = max(c->cycle + c->mem_delay, c->write_cdb_mul + 1);
+			c->write_cdb_mul = max(c->cycle + c->mul_delay, c->write_cdb_mul + 1);
 			setWriteCDBCycle(i, c->write_cdb_mul);
 			setResult(i,Vj*Vk);
+			//printf("in execute mult- result is %f index is %d- DEBUG 2\n",i->result, i->index);
+			//		fflush(NULL);
 			break;
 		case DIV:
 			c->div_in_use++;
 			setEndExCycle(i,c->cycle+c->div_delay -1);
-			c->write_cdb_div = max(c->cycle + c->mem_delay, c->write_cdb_div + 1);
+			c->write_cdb_div = max(c->cycle + c->div_delay, c->write_cdb_div + 1);
 			setWriteCDBCycle(i, c->write_cdb_div);
 			setResult(i,Vj/Vk);
 			break;
@@ -302,6 +303,7 @@ void executeReadyAddSubInst(CPU c){
 		if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->addStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
+
 				setInExecution(c->stations->addStations[i]);
 				execute(c, inst, getValuej(c->stations->addStations[i]), getValuek(c->stations->addStations[i]));
 			}
@@ -312,8 +314,8 @@ void executeReadyAddSubInst(CPU c){
 void executeReadyMulInst(CPU c){
 	int i = 0;
 	for(i = 0; i < c->stations->numOfMulStations; i++){
-		printf("in executeReadyMulInst- station %d - DEBUG 2\n",i);
-		fflush(NULL);
+		//printf("in executeReadyMulInst- station %d - DEBUG 2\n",i);
+		//fflush(NULL);
 		if(isBusy(c->stations->mulStations[i]) && getIsReady(c->stations->mulStations[i]) && c->mul_nr_units > c->mul_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->mulStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
@@ -414,8 +416,8 @@ int executeReadyLoadStoreInst(CPU c){
 
 void startExecution(CPU c){
 	if(c->add_in_use < c->add_nr_units){
-		printf("in startExecution - START ADD DEBUG \n");
-		fflush(NULL);
+		//printf("in startExecution - START ADD DEBUG \n");
+		//fflush(NULL);
 		executeReadyAddSubInst(c);
 	}
 	if(c->mul_in_use < c->mul_nr_units)
@@ -431,6 +433,8 @@ int issueInstruction(CPU c){
 		int index;
 		Instruction inst = getNonIssuedInstruction(c->queue);
 		if(getOpcode(inst) == HALT){
+			//printf("in issueInstruction - HALT -DEBUG\n");
+			//fflush(NULL);
 			c->halt = 1;
 			destroyNode(removeFromNonIssuedQueue(c->queue));
 			return 1;
@@ -505,7 +509,7 @@ void runCPU(CPU c){
 	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
 		pc++;
 	}
-	while(c->done == 0 && c->cycle < 10){
+	while(c->done == 0){
 		c->cycle++;
 		issueInstruction(c);
 		issueInstruction(c);

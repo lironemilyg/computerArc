@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
 		return -1;
 	}
 	CPU c = initCPU(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
-	printf("After Inir CPU - DEBUG 1\n");
+	printf("After Init CPU - DEBUG 1\n");
 	fflush(NULL);
 	runCPU(c);
 	destroyCPU(c);

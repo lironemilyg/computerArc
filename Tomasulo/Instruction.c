@@ -41,7 +41,7 @@ Instruction initInstruction(int index,int instruction){
 	i->index = index;
 	i->instruction = instruction;
 	decode(i, instruction);
-	printf("in initInstruction- %08X - DEBUG\n", i->instruction);
+	//printf("in initInstruction- %08X - DEBUG\n", i->instruction);
     ////fflush(NULL);
 	return i;
 }

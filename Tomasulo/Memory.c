@@ -62,6 +62,9 @@ int exportMemory(char* filename){
 	}
 	for(i = 0; i< MEMORY_SIZE; i++){
 		fprintf(fMem, "%08X\n", *(int*)&mem[i]);
+		if((int)0x06000000 == *(int*)&mem[i]){
+			break;
+		}
 	}
 	fclose(fMem);
 	return 1;

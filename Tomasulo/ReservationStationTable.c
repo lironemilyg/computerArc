@@ -40,8 +40,8 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	if(!rst){
 		return NULL;
 	}
-	printf("in initReservationStationTable- after malloc - DEBUG 2\n");
-	fflush(NULL);
+	//printf("in initReservationStationTable- after malloc - DEBUG 2\n");
+	//fflush(NULL);
 	rst->addStationsInUse = 0;
 	rst->mulStationsInUse = 0;
 	rst->divStationsInUse = 0;
@@ -54,32 +54,32 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	rst->numOfStoreBuffer = mem_nr_store_buffers;
 	rst->addStations = (ReservationStation*)malloc(sizeof(ReservationStation**)*add_nr_reservations);
 	for(i = 0; i < add_nr_reservations; i++){
-		char name[] = "ADD_\0\0\0";
-		sprintf(name,"ADD_%d",i);
+		char name[] = "ADD\0\0\0";
+		sprintf(name,"ADD%d",i);
 		rst->addStations[i] = initStation(name);
 	}
 	rst->mulStations = (ReservationStation*)malloc(sizeof(ReservationStation**)*mul_nr_reservations);
 	for(i = 0; i < mul_nr_reservations; i++){
-		char name[] = "MUL_\0\0\0";
-		sprintf(name,"MUL_%d",i);
+		char name[] = "MUL\0\0\0";
+		sprintf(name,"MUL%d",i);
 		rst->mulStations[i] = initStation(name);
 	}
 	rst->divStations = (ReservationStation*)malloc(sizeof(ReservationStation**)*div_nr_reservations);
 	for(i = 0; i < div_nr_reservations; i++){
-		char name[] = "DIV_\0\0\0";
-		sprintf(name,"DIV_%d",i);
+		char name[] = "DIV\0\0\0";
+		sprintf(name,"DIV%d",i);
 		rst->divStations[i] = initStation(name);
 	}
 	rst->loadBuffer = (ReservationStation*)malloc(sizeof(ReservationStation**)*mem_nr_load_buffers);
 	for(i = 0; i < mem_nr_load_buffers; i++){
-		char name[] = "LOAD_\0\0\0";
-		sprintf(name,"LOAD_%d",i);
+		char name[] = "LOAD\0\0\0";
+		sprintf(name,"LOAD%d",i);
 		rst->loadBuffer[i] = initStation(name);
 	}
 	rst->storeBuffer = (ReservationStation*)malloc(sizeof(ReservationStation**)*mem_nr_store_buffers);
 	for(i = 0; i < mem_nr_store_buffers; i++){
-		char name[] = "STORE_\0\0\0";
-		sprintf(name,"STORE_%d",i);
+		char name[] = "STORE\0\0\0";
+		sprintf(name,"STORE%d",i);
 		rst->storeBuffer[i] = initStation(name);
 	}
 	return rst;
@@ -148,13 +148,11 @@ void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instru
 			setStationName(inst,getResStationName(rst->storeBuffer[freeStationIndex]));
 			break;
 		case MULT:
-			printf("in insertInstruction- mult\n");
-					fflush(NULL);
 			fillStation(rst->mulStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
 			rst->mulStationsInUse++;
 			setStationName(inst,getResStationName(rst->mulStations[freeStationIndex]));
-			printf("in insertInstruction- station %d %d %d %d %s- DEBUG 2\n",rst->mulStations[0]->index, rst->mulStations[0]->busy, rst->mulStations[0]->ready, rst->mulStations[0]->opcode, rst->mulStations[0]->name);
-					fflush(NULL);
+			//printf("in insertInstruction- station %d %d %d %d %s- DEBUG 2\n",rst->mulStations[freeStationIndex]->index, rst->mulStations[0]->busy, rst->mulStations[0]->ready, rst->mulStations[0]->opcode, rst->mulStations[0]->name);
+			//		fflush(NULL);
 			break;
 		case DIV:
 			fillStation(rst->divStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
@@ -165,6 +163,8 @@ void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instru
 			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
 			rst->addStationsInUse++;
 			setStationName(inst,getResStationName(rst->addStations[freeStationIndex]));
+			//printf("in insertInstruction- station %d %s- DEBUG 2\n",rst->addStations[freeStationIndex]->index, rst->addStations[freeStationIndex]->Rjtag);
+			//		fflush(NULL);
 			break;
 		case SUB:
 			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);

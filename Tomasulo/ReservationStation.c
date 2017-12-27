@@ -25,7 +25,7 @@ typedef struct station{
 	int inExecution;
 	int imm;
 }*ReservationStation;
-
+#define MAX_SIZE_STATION_NAME 5
 ReservationStation initStation(char* stationName){
 	int size = MAX_STRING;
 	ReservationStation rs = (ReservationStation)malloc(sizeof(ReservationStation*) + size);
@@ -34,8 +34,10 @@ ReservationStation initStation(char* stationName){
 	rs->busy = 0;
 	rs->ready = 0;
 	rs->opcode = -1;
-	rs->Rjtag = "";
-	rs->Rktag = "";
+	rs->Rjtag = (char*)malloc(MAX_SIZE_STATION_NAME);
+	memset(rs->Rjtag,0,MAX_SIZE_STATION_NAME);
+	rs->Rktag = (char*)malloc(MAX_SIZE_STATION_NAME);
+	memset(rs->Rjtag,0,MAX_SIZE_STATION_NAME);
 	rs->RjTagValid = 0;
 	rs->RkTagValid = 0;
 	return rs;
@@ -75,14 +77,12 @@ int setInExecution(ReservationStation r){
 
 void changeTagj(ReservationStation r, float RjVal){
 	r->RjVal = RjVal;
-	free(r->Rjtag);
 	r->RjTagValid = 0;
 	//r->Rjtag = NULL;
 }
 
 void changeTagk(ReservationStation r, float RkVal){
 	r->RkVal = RkVal;
-	free(r->Rktag);
 	r->RkTagValid = 0;
 	//r->Rktag = NULL;
 }
@@ -113,28 +113,28 @@ void emptyStation(ReservationStation r){
 }
 
 void updateStation(ReservationStation r, Instruction i){
+	//printf("updateStations using Instruction %d - DEBUG\n", i->index);
+	//fflush(NULL);
 	if(strcmp(r->Rjtag,i->stationName) == 0)
 		changeTagj(r,getResult(i));
 	if(strcmp(r->Rktag,i->stationName) == 0)
 		changeTagk(r,getResult(i));
 	setIsReady(r);
-	if(strcmp(r->name,i->stationName) == 0)
+	if(strcmp(r->name,i->stationName) == 0){
 		emptyStation(r);
+	}
 }
 
 int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Register k, int imm){
 	if(!r || r->busy == 1){
 		return -1;
 	}
-	r->busy = 1;
 	r->index = opIndex;
 	r->inExecution = 0;
 	r->opcode = opcode;
 	r->imm = imm;
 	if(isValid(j)){
 		getValue(j,&r->RjVal);
-		if(r->RjTagValid != 0)
-			free(r->Rjtag);
 		r->RjTagValid = 0;
 	}
 	else{
@@ -142,16 +142,11 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 		size_t size;
 		getTag(j,&tempTag);
 		size = strlen(tempTag);
-		r->Rjtag =(char*)malloc(size + 1);
-		if(r->Rjtag == NULL)
-			return 0;
-		strcpy(r->Rjtag ,tempTag);
 		r->RjTagValid = 1;
+		strcpy(r->Rjtag ,tempTag);	
 	}
 	if(isValid(k)){
 		getValue(k,&r->RkVal);
-		if(r->RkTagValid != 0)
-			free(r->Rktag);
 		r->RkTagValid = 0;
 	}
 	else{
@@ -159,12 +154,10 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 		size_t size;
 		getTag(k,&tempTag);
 		size = strlen(tempTag);
-		r->Rktag =(char*)malloc(size + 1);
-		if(r->Rktag == NULL)
-			return 0;
 		strcpy(r->Rktag ,tempTag);
 		r->RkTagValid = 1;
 	}
+	r->busy = 1;
 	setIsReady(r);
 	return 1;
 }
@@ -175,10 +168,8 @@ int getIndexFromRsStation(ReservationStation r){
 
 void destroyReservationStation(ReservationStation r){
 	if(r != NULL){
-		if(r->RjTagValid)
-			free(r->Rjtag);
-		if(r->RkTagValid)
-			free(r->Rktag);
+		free(r->Rjtag);
+		free(r->Rktag);
 		free(r->name);
 		free(r);
 	}

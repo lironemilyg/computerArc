@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "Instruction.c"
 #define MAX_INST_QUEUE 16
-
+#define HALT 6
 typedef struct instructionNode{
 	Instruction inst;
 	struct instructionNode* next;
@@ -53,6 +53,8 @@ int addInstruction(InstructionQueue q, int index, int instFromMem){
 		q->nonIssueInsts->prev = in;
 		q->nonIssueInsts = in;
 	}
+	//printf("in addInstruction - getOpcode %d DEBUG \n" ,getOpcode(in->inst));
+	//fflush(NULL);
 	/*printf("in addInstruction- %08X - DEBUG\n", i->instruction);
 			//fflush(NULL);
 			printf("in addInstruction- %08X - DEBUG\n", in->inst->instruction);
@@ -129,6 +131,13 @@ void destroyNode(InstructionNode inst){
 
 void destroyInstructionQueue(InstructionQueue q){
 	if(q != NULL){
+		InstructionNode nonIssue = q->nonIssueInsts;
+		while(nonIssue != NULL){
+			InstructionNode next = nonIssue->next;
+			destroyInstruction(nonIssue->inst);
+			free(nonIssue);
+			nonIssue = next;
+		}
 		free(q->nonIssueInsts);
 		free(q->issueInsts);
 		free(q);
