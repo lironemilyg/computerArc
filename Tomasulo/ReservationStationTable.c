@@ -163,8 +163,8 @@ void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instru
 			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
 			rst->addStationsInUse++;
 			setStationName(inst,getResStationName(rst->addStations[freeStationIndex]));
-			//printf("in insertInstruction- station %d %s- DEBUG 2\n",rst->addStations[freeStationIndex]->index, rst->addStations[freeStationIndex]->Rjtag);
-			//		fflush(NULL);
+			//printf("in insertInstruction- station %d %s %s- DEBUG 2\n",rst->addStations[freeStationIndex]->index, rst->addStations[freeStationIndex]->Rjtag, rst->addStations[freeStationIndex]->Rktag);
+			//fflush(NULL);
 			break;
 		case SUB:
 			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);

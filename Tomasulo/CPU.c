@@ -258,10 +258,12 @@ void execute(CPU c, Instruction i,float Vj, float Vk){
 		case ADD:
 			c->add_in_use++;
 			setEndExCycle(i,c->cycle+c->add_delay -1);
-			printf("in execute add-  write_cdb_add %d c->cycle %d - DEBUG\n",c->write_cdb_add,c->cycle);
-			fflush(NULL);
+			//printf("in execute add-  index %d c->cycle %d - DEBUG\n",i->index,c->cycle);
+			//fflush(NULL);
 			c->write_cdb_add = max(c->cycle + c->add_delay, c->write_cdb_add + 1);
 			setWriteCDBCycle(i,c->write_cdb_add);
+			//printf("in execute add write CDB cycle %d - DEBUG\n",c->write_cdb_add);
+			//fflush(NULL);
 			setResult(i,Vj+Vk);
 			//printf("in execute add- result is %f index is %d- DEBUG 2\n",i->result, i->index);
 			//		fflush(NULL);
@@ -269,8 +271,8 @@ void execute(CPU c, Instruction i,float Vj, float Vk){
 		case SUB:
 			c->add_in_use++;
 			setEndExCycle(i,c->cycle+c->add_delay -1);
-			printf("in execute sub-  write_cdb_add %d c->cycle %d- DEBUG\n",c->write_cdb_add,c->cycle);
-			fflush(NULL);
+			//printf("in execute sub-  index %d c->cycle %d- DEBUG\n",i->index,c->cycle);
+			//fflush(NULL);
 			c->write_cdb_add = max(c->cycle + c->add_delay, c->write_cdb_add + 1);
 			setWriteCDBCycle(i,c->write_cdb_add);
 			setResult(i,Vj-Vk);
@@ -303,7 +305,6 @@ void executeReadyAddSubInst(CPU c){
 		if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->addStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
-
 				setInExecution(c->stations->addStations[i]);
 				execute(c, inst, getValuej(c->stations->addStations[i]), getValuek(c->stations->addStations[i]));
 			}
@@ -432,6 +433,8 @@ int issueInstruction(CPU c){
 	if(c->halt == 0){
 		int index;
 		Instruction inst = getNonIssuedInstruction(c->queue);
+		//printf("instruction to issue %d DEBUG \n", inst->index);
+		//fflush(NULL);
 		if(getOpcode(inst) == HALT){
 			//printf("in issueInstruction - HALT -DEBUG\n");
 			//fflush(NULL);
@@ -521,8 +524,10 @@ void runCPU(CPU c){
 				pc++;
 			}
 		}
+
 		startExecution(c);
 		writeCDB(c);
+
 	}
 	printf("in runCPU- after while- DEBUG 2\n");
 	fflush(NULL);

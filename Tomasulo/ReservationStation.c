@@ -119,7 +119,8 @@ void updateStation(ReservationStation r, Instruction i){
 		changeTagj(r,getResult(i));
 	if(strcmp(r->Rktag,i->stationName) == 0)
 		changeTagk(r,getResult(i));
-	setIsReady(r);
+	if(!r->inExecution)
+		setIsReady(r);
 	if(strcmp(r->name,i->stationName) == 0){
 		emptyStation(r);
 	}
