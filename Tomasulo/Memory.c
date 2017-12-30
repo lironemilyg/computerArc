@@ -49,6 +49,18 @@ int importMemory(char* filename){ //import memory from file to array
 	fclose(fMem);
 	return 1;
 }
+//getters and setters
+float getMemoryI(int i){ 
+	return mem[i];
+}
+
+int getMemoryInstruction(int i){
+	return *(unsigned int*)&mem[i];
+}
+
+void setMemoryI(int i, float val){
+	mem[i] = val;
+}
 
 int exportMemory(char* filename){ //export memory array to file
 	FILE *fMem;
@@ -62,24 +74,16 @@ int exportMemory(char* filename){ //export memory array to file
 	}
 	for(i = 0; i< MEMORY_SIZE; i++){
 		fprintf(fMem, "%08X\n", *(int*)&mem[i]);
-		if((int)0x06000000 == *(int*)&mem[i]){
-			break;
+		if(i==6){
+			printf("%f %08X\n",getMemoryI(i), *(int*)&mem[i]);
+			fflush(NULL);
 		}
 	}
 	fclose(fMem);
 	return 1;
 }
 
-//getters and setters
-float getMemoryI(int i){ 
-	return mem[i];
-}
 
-int getMemoryInstruction(int i){
-	return *(unsigned int*)&mem[i];
-}
 
-void setMemoryI(int i, float val){
-	mem[i] = val;
-}
+
 

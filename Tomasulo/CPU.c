@@ -188,7 +188,7 @@ void writeCDB(CPU c){
 		if(getWriteCDBCycle(in->inst) == c->cycle){
 			c->done = readCDB(c->stations, in->inst, c->halt);
 			getTag(c->regs[getRi(in->inst)], &tag);
-			//printf("in WriteCDB is valid: %d tag: %s stationName: %s - DEBUG\n", isValid(c->regs[getRi(in->inst)]), tag, getStationName(in->inst));
+			//printf("in WriteCDB cycle: %d\n", c->cycle);
 			//fflush(NULL);
 			if((!isValid(c->regs[getRi(in->inst)])) && strcmp(tag, getStationName(in->inst)) == 0){
 				//printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
@@ -238,6 +238,8 @@ void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction ac
 			setEndExCycle(i,c->cycle+c->mem_delay -1);
 			c->write_cdb_mem = max(c->cycle + c->mem_delay, c->write_cdb_mem + 1);
 			setWriteCDBCycle(i, c->write_cdb_mem);
+			printf("load res %f - DEBUG\n",getMemoryI(getImm(i)));
+			fflush(NULL);
 			setResult(i,getMemoryI(getImm(i)));
 			break;
 		case ST:
@@ -245,7 +247,9 @@ void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction ac
 			setEndExCycle(i,c->cycle+c->mem_delay -1);
 			c->write_cdb_mem = max(c->cycle + c->mem_delay, c->write_cdb_mem + 1);
 			setWriteCDBCycle(i, c->write_cdb_mem);
-			setMemoryI(getImm(i),Vk);
+			setResult(i,Vk);
+			printf("imm: %d store res: %f, get: %f - DEBUG\n",getImm(i),Vk,getMemoryI(getImm(i)));
+			exportMemory("./memout6.txt");
 			break;
 		case ADD:
 			c->add_in_use++;
@@ -519,11 +523,7 @@ void runCPU(CPU c){
 
 		startExecution(c); //execute instruction if they are ready and threre is functionaluty station
 		writeCDB(c); //write to cdb if needed
-
 	}
-	printf("in runCPU- after while- DEBUG 2\n");
-	fflush(NULL);
-
 	exportMemory(c->memout); //create output files
 	createRegout(c);
 	createTraceinst(c);
