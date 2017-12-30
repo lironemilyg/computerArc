@@ -12,8 +12,8 @@
 
 typedef struct reg{
 	float val;
-	char* tag;
 	int rValid;
+	char* tag;
 }*Register;
 
 Register initRegister(int index){
