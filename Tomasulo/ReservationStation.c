@@ -35,10 +35,13 @@ ReservationStation initStation(char* stationName){
 	rs->busy = 0;
 	rs->ready = 0;
 	rs->opcode = -1;
+	r->inExecution = 0;
 	rs->Rjtag = (char*)malloc(MAX_SIZE_STATION_NAME);
 	memset(rs->Rjtag,'\0',MAX_SIZE_STATION_NAME);
 	rs->Rktag = (char*)malloc(MAX_SIZE_STATION_NAME);
 	memset(rs->Rjtag,'\0',MAX_SIZE_STATION_NAME);
+	strcpy(r->Rjtag ,"");
+	strcpy(r->Rktag ,"");
 	rs->RjTagValid = 0;
 	rs->RkTagValid = 0;
 	return rs;
