@@ -67,7 +67,7 @@ int setValue(Register r, float val){
 
 int setTag(Register r, char* tag){
 	if(r != NULL){
-		if(r->tag == NULL){
+		if(r->tag != NULL){
 			free(r->tag);
 			r->rValid = 1;
 		}
