@@ -496,6 +496,9 @@ void destroyCPU(CPU c){
 	if(c != NULL){
 		destroyReservationStationTable(c->stations);
 		destroyInstructionQueue(c->queue);
+		for(int i=0; i < REGISTER_NUM; i++){
+			destroyRegister(c->regs[i]);
+		}
 		free(c);
 	}
 }
