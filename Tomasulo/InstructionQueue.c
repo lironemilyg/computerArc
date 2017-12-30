@@ -135,10 +135,10 @@ void destroyInstructionQueue(InstructionQueue q){
 		while(nonIssue != NULL){
 			InstructionNode next = nonIssue->next;
 			destroyInstruction(nonIssue->inst);
-			free(nonIssue);
+			//free(nonIssue);
 			nonIssue = next;
 		}
-		free(q->nonIssueInsts);
+		//free(q->nonIssueInsts);
 		free(q->issueInsts);
 		free(q);
 	}
