@@ -493,10 +493,11 @@ void createTraceinst(CPU c){
 }
 
 void destroyCPU(CPU c){
+	int i;
 	if(c != NULL){
 		destroyReservationStationTable(c->stations);
 		destroyInstructionQueue(c->queue);
-		for(int i=0; i < REGISTER_NUM; i++){
+		for(i=0; i < REGISTER_NUM; i++){
 			destroyRegister(c->regs[i]);
 		}
 		free(c);
