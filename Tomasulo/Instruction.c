@@ -47,7 +47,8 @@ Instruction initInstruction(int index,int instruction){ //init
 }
 
 void destroyInstruction(Instruction i){ //destroy
-	free(i);
+	if(i != NULL)
+		free(i);
 }
 
 
