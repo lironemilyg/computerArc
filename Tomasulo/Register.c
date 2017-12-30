@@ -74,8 +74,8 @@ int setTag(Register r, char* tag){
 		if(tag != NULL){
 			size_t size = strlen(tag) + 1;
 			r->tag = (char*) malloc(size);
-			memset(r->tag,'\0',size+1);
-			strncpy(r->tag,tag,size+1);
+			memset(r->tag,'\0',size);
+			strncpy(r->tag,tag,size);
 			r->rValid = 0;
 		}
 		else
