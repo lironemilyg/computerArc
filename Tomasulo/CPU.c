@@ -165,6 +165,8 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 }
 
 void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBName){ //helper function - write to traceCDB
+	printf( " in trace CDB %d %d %s %.5f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
+	fflush(NULL);
 	fprintf(fTraceCDB, "%d %d %s %.5f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
 }
 
@@ -175,7 +177,7 @@ void writeCDB(CPU c){
 	if(c->traceCDB == NULL){ //check for valid filename
 		return;
 	}
-	fTraceCDB = fopen(c->regout, "a");
+	fTraceCDB = fopen(c->traceCDB, "a");
 	if(fTraceCDB == NULL){ //check if file exist
 			return;
 	}
@@ -498,6 +500,11 @@ void destroyCPU(CPU c){ //free all CPU allocations
 
 void runCPU(CPU c){
 	int pc = 0;
+	FILE *fTraceCDB = fopen(c->traceCDB, "w");
+	if(fTraceCDB == NULL){ //check if file exist
+			return;
+	}
+	fclose(fTraceCDB);
 	importMemory(c->memin); //import memory to array
 	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){ //read instruction
 		pc++; //update pc
