@@ -500,6 +500,7 @@ void destroyCPU(CPU c){
 		for(i=0; i < REGISTER_NUM; i++){
 			destroyRegister(c->regs[i]);
 		}
+		free(c->regs);
 		free(c);
 	}
 }
