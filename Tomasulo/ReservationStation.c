@@ -25,7 +25,7 @@ typedef struct station{ //RS fileds
 	int inExecution;
 	int imm;
 }*ReservationStation;
-#define MAX_SIZE_STATION_NAME 5
+#define MAX_SIZE_STATION_NAME 6
 
 ReservationStation initStation(char* stationName){ //create a station
 	int size = MAX_STRING;
