@@ -135,6 +135,8 @@ int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Regis
 	r->inExecution = 0;
 	r->opcode = opcode;
 	r->imm = imm;
+	strcpy(r->Rjtag ,"");
+	strcpy(r->Rktag ,"");
 	if(isValid(j)){
 		getValue(j,&r->RjVal);
 		r->RjTagValid = 0;
