@@ -165,15 +165,11 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 }
 
 void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBName){ //helper function - write to traceCDB
-	printf( " in trace CDB %d %d %s %.6f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
-	fflush(NULL);
 	fprintf(fTraceCDB, "%d %d %s %.6f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
 }
 
 void writeCDB(CPU c){ 
 	FILE *fTraceCDB;
-	//printf("in enter -  DEBUG\n");
-	//fflush(NULL);
 	if(c->traceCDB == NULL){ //check for valid filename
 		return;
 	}
@@ -184,17 +180,11 @@ void writeCDB(CPU c){
 	InstructionNode in = c->queue->issueInstsTail;
 	int opcode;
 	char* tag;
-	//printf("getWriteCDBCycle(in->inst): %d    cycle %d\n", getWriteCDBCycle(c->queue->issueInsts->inst), c->cycle);
-	//fflush(NULL);
 	while(in != NULL){ //go over all issedInstruction and if there is Instraction that need to write to cdb - write.
 		if(getWriteCDBCycle(in->inst) == c->cycle){
 			c->done = readCDB(c->stations, in->inst, c->halt);
 			getTag(c->regs[getRi(in->inst)], &tag);
-			//printf("in WriteCDB cycle: %d\n", c->cycle);
-			//fflush(NULL);
 			if((!isValid(c->regs[getRi(in->inst)])) && strcmp(tag, getStationName(in->inst)) == 0){
-				//printf("**DEBUG** in WriteCDB- setting up Value of reg\n");
-				//fflush(NULL);
 				setValue(c->regs[getRi(in->inst)], getResult(in->inst));
 				setTag(c->regs[getRi(in->inst)], NULL);
 			}
@@ -240,8 +230,6 @@ void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction ac
 			setEndExCycle(i,c->cycle+c->mem_delay -1);
 			c->write_cdb_mem = max(c->cycle + c->mem_delay, c->write_cdb_mem + 1);
 			setWriteCDBCycle(i, c->write_cdb_mem);
-			printf("load res %f - DEBUG\n",getMemoryI(getImm(i)));
-			fflush(NULL);
 			setResult(i,getMemoryI(getImm(i)));
 			break;
 		case ST:
@@ -250,32 +238,20 @@ void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction ac
 			c->write_cdb_mem = max(c->cycle + c->mem_delay, c->write_cdb_mem + 1);
 			setWriteCDBCycle(i, c->write_cdb_mem);
 			setResult(i,Vk);
-			printf("imm: %d store res: %f, get: %f - DEBUG\n",getImm(i),Vk,getMemoryI(getImm(i)));
-			exportMemory("./memout6.txt");
 			break;
 		case ADD:
 			c->add_in_use++;
 			setEndExCycle(i,c->cycle+c->add_delay -1);
-			//printf("in execute add-  index %d c->cycle %d - DEBUG\n",i->index,c->cycle);
-			//fflush(NULL);
 			c->write_cdb_add = max(c->cycle + c->add_delay, c->write_cdb_add + 1);
 			setWriteCDBCycle(i,c->write_cdb_add);
-			//printf("in execute add write CDB cycle %d - DEBUG\n",c->write_cdb_add);
-			//fflush(NULL);
 			setResult(i,Vj+Vk);
-			//printf("in execute add- result is %f index is %d- DEBUG 2\n",i->result, i->index);
-			//		fflush(NULL);
 			break;
 		case SUB:
 			c->add_in_use++;
 			setEndExCycle(i,c->cycle+c->add_delay -1);
-			//printf("in execute sub-  index %d c->cycle %d- DEBUG\n",i->index,c->cycle);
-			//fflush(NULL);
 			c->write_cdb_add = max(c->cycle + c->add_delay, c->write_cdb_add + 1);
 			setWriteCDBCycle(i,c->write_cdb_add);
 			setResult(i,Vj-Vk);
-			//printf("in execute sub- result is %f index is %d- DEBUG 2\n",i->result, i->index);
-			//		fflush(NULL);
 			break;
 		case MULT:
 			c->mul_in_use++;
@@ -283,8 +259,6 @@ void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction ac
 			c->write_cdb_mul = max(c->cycle + c->mul_delay, c->write_cdb_mul + 1);
 			setWriteCDBCycle(i, c->write_cdb_mul);
 			setResult(i,Vj*Vk);
-			//printf("in execute mult- result is %f index is %d- DEBUG 2\n",i->result, i->index);
-			//		fflush(NULL);
 			break;
 		case DIV:
 			c->div_in_use++;
@@ -313,8 +287,6 @@ void executeReadyAddSubInst(CPU c){  //execute if ready RS
 void executeReadyMulInst(CPU c){//execute if ready RS
 	int i = 0;
 	for(i = 0; i < c->stations->numOfMulStations; i++){
-		//printf("in executeReadyMulInst- station %d - DEBUG 2\n",i);
-		//fflush(NULL);
 		if(isBusy(c->stations->mulStations[i]) && getIsReady(c->stations->mulStations[i]) && c->mul_nr_units > c->mul_in_use){
 			Instruction inst = getIssuedInstructionByIndex(c->queue, getIndexFromRsStation(c->stations->mulStations[i]));
 			if(getIssueCycle(inst) < c->cycle){
@@ -415,8 +387,6 @@ int executeReadyLoadStoreInst(CPU c){//execute if ready RS and can Load or store
 
 void startExecution(CPU c){ //get over all RS and check if can execute
 	if(c->add_in_use < c->add_nr_units){
-		//printf("in startExecution - START ADD DEBUG \n");
-		//fflush(NULL);
 		executeReadyAddSubInst(c);
 	}
 	if(c->mul_in_use < c->mul_nr_units)
@@ -431,11 +401,7 @@ int issueInstruction(CPU c){ //if CPU not halt
 	if(c->halt == 0){
 		int index;
 		Instruction inst = getNonIssuedInstruction(c->queue);
-		//printf("instruction to issue %d DEBUG \n", inst->index);
-		//fflush(NULL);
 		if(getOpcode(inst) == HALT){
-			//printf("in issueInstruction - HALT -DEBUG\n");
-			//fflush(NULL);
 			c->halt = 1; //CPU Halt!!
 			destroyNode(removeFromNonIssuedQueue(c->queue));
 			return 1;
@@ -534,6 +500,4 @@ void runCPU(CPU c){
 	exportMemory(c->memout); //create output files
 	createRegout(c);
 	createTraceinst(c);
-
-	printf("Simulation Done!!!!\n");
 }

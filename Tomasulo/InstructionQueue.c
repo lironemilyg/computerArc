@@ -53,18 +53,10 @@ int addInstruction(InstructionQueue q, int index, int instFromMem){ //add inst t
 		q->nonIssueInsts->prev = in;
 		q->nonIssueInsts = in;
 	}
-	//printf("in addInstruction - getOpcode %d DEBUG \n" ,getOpcode(in->inst));
-	//fflush(NULL);
-	/*printf("in addInstruction- %08X - DEBUG\n", i->instruction);
-			//fflush(NULL);
-			printf("in addInstruction- %08X - DEBUG\n", in->inst->instruction);
-					//fflush(NULL);*/
 	return 1;
 }
 
 int addIssueInstruction(InstructionQueue q, InstructionNode in){//add inst to issue inst queue and remove it from non issue queue
-	//printf("in addIssueInstruction  -  %08X - DEBUG\n", in->inst->instruction);
-	////fflush(NULL);
 	q->issueSize++;
 	in->prev = NULL;
 	if(q->issueSize == 1){
@@ -77,8 +69,6 @@ int addIssueInstruction(InstructionQueue q, InstructionNode in){//add inst to is
 		q->issueInsts->prev = in;
 		q->issueInsts = in;
 	}
-	//printf("in addIssueInstruction - end -  %08X - DEBUG\n", q->issueInsts->inst->instruction);
-	//	//fflush(NULL);
 	return 1;
 }
 
@@ -119,8 +109,6 @@ InstructionNode removeFromNonIssuedQueue(InstructionQueue q){
 		curr->prev = NULL;
 	}
 	q->nonIssueSize--;
-	//printf("in removeFromNonIssuedQueue - -  %08X - DEBUG\n", curr->inst->instruction);
-	//		//fflush(NULL);
 	return curr;
 }
 
@@ -134,11 +122,8 @@ void destroyInstructionQueue(InstructionQueue q){
 		InstructionNode nonIssue = q->nonIssueInsts;
 		while(nonIssue != NULL){
 			InstructionNode next = nonIssue->next;
-			//destroyInstruction(nonIssue->inst);
-			//free(nonIssue);
 			nonIssue = next;
 		}
-		//free(q->nonIssueInsts);
 		free(q->issueInsts);
 		free(q);
 	}

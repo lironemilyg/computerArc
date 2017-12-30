@@ -74,10 +74,6 @@ int exportMemory(char* filename){ //export memory array to file
 	}
 	for(i = 0; i< MEMORY_SIZE; i++){
 		fprintf(fMem, "%08X\n", *(int*)&mem[i]);
-		if(i==8){
-			printf("%f %08X\n",getMemoryI(i), *(int*)&mem[i]);
-			fflush(NULL);
-		}
 	}
 	fclose(fMem);
 	return 1;

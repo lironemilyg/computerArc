@@ -118,8 +118,6 @@ void emptyStation(ReservationStation r){
 }
 
 void updateStation(ReservationStation r, Instruction i){ //update station according tag
-	//printf("updateStations using Instruction %d - DEBUG\n", i->index);
-	//fflush(NULL);
 	if(strcmp(r->Rjtag,i->stationName) == 0)
 		changeTagj(r,getResult(i));
 	if(strcmp(r->Rktag,i->stationName) == 0)

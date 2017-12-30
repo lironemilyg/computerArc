@@ -40,8 +40,6 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	if(!rst){
 		return NULL;
 	}
-	//printf("in initReservationStationTable- after malloc - DEBUG 2\n");
-	//fflush(NULL);
 	rst->addStationsInUse = 0; //there is no station in use
 	rst->mulStationsInUse = 0;
 	rst->divStationsInUse = 0;
@@ -151,8 +149,6 @@ void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instru
 			fillStation(rst->mulStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
 			rst->mulStationsInUse++;
 			setStationName(inst,getResStationName(rst->mulStations[freeStationIndex]));
-			//printf("in insertInstruction- station %d %d %d %d %s- DEBUG 2\n",rst->mulStations[freeStationIndex]->index, rst->mulStations[0]->busy, rst->mulStations[0]->ready, rst->mulStations[0]->opcode, rst->mulStations[0]->name);
-			//		fflush(NULL);
 			break;
 		case DIV:
 			fillStation(rst->divStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
@@ -163,8 +159,6 @@ void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instru
 			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
 			rst->addStationsInUse++;
 			setStationName(inst,getResStationName(rst->addStations[freeStationIndex]));
-			//printf("in insertInstruction- station %d %s %s- DEBUG 2\n",rst->addStations[freeStationIndex]->index, rst->addStations[freeStationIndex]->Rjtag, rst->addStations[freeStationIndex]->Rktag);
-			//fflush(NULL);
 			break;
 		case SUB:
 			fillStation(rst->addStations[freeStationIndex], index, opcode, regs[getRj(inst)], regs[getRk(inst)], imm);
