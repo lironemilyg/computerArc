@@ -16,25 +16,25 @@
 #define HALT 6
 
 typedef struct stations{
-	ReservationStation* addStations;
-	ReservationStation* mulStations;
-	ReservationStation* divStations;
-	ReservationStation* loadBuffer;
-	ReservationStation* storeBuffer;
-	int numOfAddStations;
-	int numOfMulStations;
-	int numOfDivStations;
-	int numOfLoadBuffer;
-	int numOfStoreBuffer;
-	int addStationsInUse;
-	int mulStationsInUse;
-	int divStationsInUse;
-	int loadBufferInUse;
-	int storeBufferInUse;
+	ReservationStation* addStations;  //array of add RS
+	ReservationStation* mulStations;  //array of mul RS
+	ReservationStation* divStations;  //array of div RS
+	ReservationStation* loadBuffer;   //array of load RS
+	ReservationStation* storeBuffer;  //array of store RS
+	int numOfAddStations; //total num of add RS
+	int numOfMulStations; //total num of mul RS
+	int numOfDivStations; //total num of div RS
+	int numOfLoadBuffer;  //total num of load RS
+	int numOfStoreBuffer; //total num of store RS
+	int addStationsInUse; //total num of add RS in use
+	int mulStationsInUse; //total num of mul RS in use
+	int divStationsInUse; //total num of div RS in use
+	int loadBufferInUse; //total num of load RS in use
+	int storeBufferInUse; //total num of store RS in use
 }*ReservationStationTable;
 
 ReservationStationTable initReservationStationTable(int add_nr_reservations, int mul_nr_reservations, int div_nr_reservations, int mem_nr_load_buffers, int mem_nr_store_buffers){
-	int i = 0;
+	int i = 0; //init RS table
 	int totalSize = add_nr_reservations + mul_nr_reservations + div_nr_reservations + mem_nr_load_buffers + mem_nr_store_buffers;
 	ReservationStationTable rst = (ReservationStationTable)malloc(sizeof(ReservationStation)*totalSize + sizeof(int)*5);
 	if(!rst){
@@ -42,7 +42,7 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	}
 	//printf("in initReservationStationTable- after malloc - DEBUG 2\n");
 	//fflush(NULL);
-	rst->addStationsInUse = 0;
+	rst->addStationsInUse = 0; //there is no station in use
 	rst->mulStationsInUse = 0;
 	rst->divStationsInUse = 0;
 	rst->loadBufferInUse = 0;
@@ -53,31 +53,31 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	rst->numOfLoadBuffer = mem_nr_load_buffers;
 	rst->numOfStoreBuffer = mem_nr_store_buffers;
 	rst->addStations = (ReservationStation*)malloc(sizeof(ReservationStation**)*add_nr_reservations);
-	for(i = 0; i < add_nr_reservations; i++){
+	for(i = 0; i < add_nr_reservations; i++){ //init each RS
 		char name[] = "ADD\0\0\0";
 		sprintf(name,"ADD%d",i);
 		rst->addStations[i] = initStation(name);
 	}
 	rst->mulStations = (ReservationStation*)malloc(sizeof(ReservationStation**)*mul_nr_reservations);
-	for(i = 0; i < mul_nr_reservations; i++){
+	for(i = 0; i < mul_nr_reservations; i++){//init each RS
 		char name[] = "MUL\0\0\0";
 		sprintf(name,"MUL%d",i);
 		rst->mulStations[i] = initStation(name);
 	}
 	rst->divStations = (ReservationStation*)malloc(sizeof(ReservationStation**)*div_nr_reservations);
-	for(i = 0; i < div_nr_reservations; i++){
+	for(i = 0; i < div_nr_reservations; i++){//init each RS
 		char name[] = "DIV\0\0\0";
 		sprintf(name,"DIV%d",i);
 		rst->divStations[i] = initStation(name);
 	}
 	rst->loadBuffer = (ReservationStation*)malloc(sizeof(ReservationStation**)*mem_nr_load_buffers);
-	for(i = 0; i < mem_nr_load_buffers; i++){
+	for(i = 0; i < mem_nr_load_buffers; i++){//init each RS
 		char name[] = "LOAD\0\0\0";
 		sprintf(name,"LOAD%d",i);
 		rst->loadBuffer[i] = initStation(name);
 	}
 	rst->storeBuffer = (ReservationStation*)malloc(sizeof(ReservationStation**)*mem_nr_store_buffers);
-	for(i = 0; i < mem_nr_store_buffers; i++){
+	for(i = 0; i < mem_nr_store_buffers; i++){//init each RS
 		char name[] = "STORE\0\0\0";
 		sprintf(name,"STORE%d",i);
 		rst->storeBuffer[i] = initStation(name);
@@ -85,7 +85,7 @@ ReservationStationTable initReservationStationTable(int add_nr_reservations, int
 	return rst;
 }
 
-int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU){
+int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU){ //update all station about read cdb
 	int j = 0;
 	for(j = 0; j < rst->numOfAddStations; j++){
 		updateStation(rst->addStations[j],i);
@@ -132,7 +132,7 @@ int readCDB(ReservationStationTable rst, Instruction i, int isHaltCPU){
 	return 0;
 }
 
-void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instruction inst, Register* regs){
+void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instruction inst, Register* regs){ //insert inst to RS
 	int opcode = getOpcode(inst);
 	int imm = getImm(inst);
 	int index = getIndex(inst);
@@ -178,7 +178,7 @@ void insertInstruction(ReservationStationTable rst, int freeStationIndex, Instru
 	}
 }
 
-int isStationFree(ReservationStationTable rst, int opcode){
+int isStationFree(ReservationStationTable rst, int opcode){ //check if there is free station according OC
 	int i;
 	switch(opcode){
 		case LD:
@@ -227,7 +227,7 @@ int isStationFree(ReservationStationTable rst, int opcode){
 	return -1;
 }
 
-void destroyReservationStationTable(ReservationStationTable rst){
+void destroyReservationStationTable(ReservationStationTable rst){ //destroy and free allocation
 	if(rst != NULL){
 		int j = 0;
 		for(j = 0; j < rst->numOfAddStations; j++){

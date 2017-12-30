@@ -19,34 +19,34 @@
 #define HALT 6
 #define CONFIG_LINE_SIZE 1024
 
-typedef struct cpu{
+typedef struct cpu{ //CPU object
 	int cycle;
 	int done;
 	int halt;
-	int add_nr_units;
+	int add_nr_units; //functional station
 	int mul_nr_units;
 	int div_nr_units;
-	int add_nr_reservations;
+	int add_nr_reservations; //reservatuon station
 	int mul_nr_reservations;
 	int div_nr_reservations;
-	int add_delay;
+	int add_delay; //delays
 	int mul_delay;
 	int div_delay;
 	int mem_delay;
 	int mem_nr_load_buffers;
 	int mem_nr_store_buffers;
-	int add_in_use;
+	int add_in_use; //functional station in use
 	int mul_in_use;
 	int div_in_use;
 	int mem_in_use;
-	int write_cdb_add;
+	int write_cdb_add; //writeCDB cycle on specific cdb
 	int write_cdb_mul;
 	int write_cdb_div;
 	int write_cdb_mem;
-	char *cfg, *memin, *memout, *regout, *traceInst, *traceCDB;
-	Register regs[REGISTER_NUM];
-	ReservationStationTable stations;
-	InstructionQueue queue;
+	char *cfg, *memin, *memout, *regout, *traceInst, *traceCDB; //IO files
+	Register regs[REGISTER_NUM]; //registers
+	ReservationStationTable stations; //RS
+	InstructionQueue queue; //Instruction queue
 }*CPU;
 
 int max(int num1, int num2) {
@@ -55,7 +55,7 @@ int max(int num1, int num2) {
    return num2;
 }
 
-void trim(char* string){
+void trim(char* string){ //for parsing config file
     int dest;
     int src=0;
     int len = strlen(string);
@@ -76,14 +76,14 @@ void trim(char* string){
     }
 }
 
-char* split(char* line, char delimiter){
+char* split(char* line, char delimiter){ //for parsing config file
 	char* start = strchr(line,delimiter);
 	start++;
 	trim(start);
 	return start;
 }
 
-int configCPU(CPU c){
+int configCPU(CPU c){ //config cpu according config file
 	FILE *fCfp;
 	int nRead = 0;
 	size_t buff_size = CONFIG_LINE_SIZE;
@@ -124,57 +124,51 @@ int configCPU(CPU c){
 	return 1;
 }
 
-CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst, char* traceCDB){
+CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst, char* traceCDB){ //create CPU according simulation args
 	int i;
-	//ReservationStationTable stations;
-	InstructionQueue queue;
+	InstructionQueue queue; 
 	CPU c = (CPU)malloc(sizeof(CPU*)+sizeof(char)*300);
 	if(c == NULL){
 		return c;
 	}
-	for(i=0; i < REGISTER_NUM; i++){
+	for(i=0; i < REGISTER_NUM; i++){ //Init registers
 		c->regs[i] = initRegister(i);
 	}
-	for(i=0; i<REGISTER_NUM; i++){
-		float f;
-		int res = getValue(c->regs[i],&f);
-		printf("val: %f valid: %d\n",f, res);
-	}
-	c->cycle = 0;
-	c->add_in_use = 0;
+	c->cycle = 0; //first cycle
+	c->add_in_use = 0; //no station in use right now
 	c->mul_in_use = 0;
 	c->div_in_use = 0;
 	c->mem_in_use = 0;
-	c->done = 0;
+	c->done = 0; 
 	c->halt = 0;
-	c->cfg = cfg;
+	c->cfg = cfg;  //IO files
 	c->memin = memin;
 	c->memout = memout;
 	c->regout = regout;
 	c->traceInst = traceInst;
 	c->traceCDB = traceCDB;
-	c->write_cdb_add = 0;
+	c->write_cdb_add = 0; //writeCFB on each CDB is 0
 	c->write_cdb_mul = 0;
 	c->write_cdb_div = 0;
 	c->write_cdb_mem = 0;
-
-	if(configCPU(c) == 0){
+	if(configCPU(c) == 0){ //config cpu according to config file
 		free(c);
 		return NULL;
 	}
+	//create and init RS table
 	ReservationStationTable stations = initReservationStationTable(c->add_nr_reservations, c->mul_nr_reservations, c->div_nr_reservations, c->mem_nr_load_buffers, c->mem_nr_store_buffers);
-	queue = initInstructionQueue();
+	queue = initInstructionQueue(); //init instructuonQueue
 	c = (CPU)realloc(c,sizeof(*c) + sizeof(stations) + sizeof(queue) + 24);
 	c->stations = stations;
 	c->queue = queue;
 	return c;
 }
 
-void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBName){
+void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBName){ //helper function - write to traceCDB
 	fprintf(fTraceCDB, "%d %d %s %.5f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
 }
 
-void writeCDB(CPU c){
+void writeCDB(CPU c){ 
 	FILE *fTraceCDB;
 	//printf("in enter -  DEBUG\n");
 	//fflush(NULL);
@@ -188,12 +182,10 @@ void writeCDB(CPU c){
 	InstructionNode in = c->queue->issueInstsTail;
 	int opcode;
 	char* tag;
-	int cnt = 0;
 	//printf("getWriteCDBCycle(in->inst): %d    cycle %d\n", getWriteCDBCycle(c->queue->issueInsts->inst), c->cycle);
 	//fflush(NULL);
-	while(in != NULL && cnt < 5){
+	while(in != NULL){ //go over all issedInstruction and if there is Instraction that need to write to cdb - write.
 		if(getWriteCDBCycle(in->inst) == c->cycle){
-			cnt++;
 			c->done = readCDB(c->stations, in->inst, c->halt);
 			getTag(c->regs[getRi(in->inst)], &tag);
 			//printf("in WriteCDB is valid: %d tag: %s stationName: %s - DEBUG\n", isValid(c->regs[getRi(in->inst)]), tag, getStationName(in->inst));
@@ -238,7 +230,7 @@ void writeCDB(CPU c){
 	fclose(fTraceCDB);
 }
 
-void execute(CPU c, Instruction i,float Vj, float Vk){
+void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction according the OC
 	setStartExCycle(i,c->cycle);
 	switch(i->opcode){
 		case LD:
@@ -299,7 +291,7 @@ void execute(CPU c, Instruction i,float Vj, float Vk){
 
 }
 
-void executeReadyAddSubInst(CPU c){
+void executeReadyAddSubInst(CPU c){  //execute if ready RS
 	int i = 0;
 	for(i = 0; i < c->stations->numOfAddStations; i++){
 		if(isBusy(c->stations->addStations[i]) && getIsReady(c->stations->addStations[i]) && c->add_nr_units > c->add_in_use){
@@ -312,7 +304,7 @@ void executeReadyAddSubInst(CPU c){
 	}
 }
 
-void executeReadyMulInst(CPU c){
+void executeReadyMulInst(CPU c){//execute if ready RS
 	int i = 0;
 	for(i = 0; i < c->stations->numOfMulStations; i++){
 		//printf("in executeReadyMulInst- station %d - DEBUG 2\n",i);
@@ -327,7 +319,7 @@ void executeReadyMulInst(CPU c){
 	}
 }
 
-void executeReadyDivInst(CPU c){
+void executeReadyDivInst(CPU c){//execute if ready RS
 	int i = 0;
 	for(i = 0; i < c->stations->numOfDivStations; i++){
 		if(isBusy(c->stations->divStations[i]) && getIsReady(c->stations->divStations[i]) && c->div_nr_units > c->div_in_use){
@@ -340,7 +332,7 @@ void executeReadyDivInst(CPU c){
 	}
 }
 
-int canLoadOrStore(CPU c, int index, int add, int opcode){
+int canLoadOrStore(CPU c, int index, int add, int opcode){ //check if can Load or store inst
 	Instruction inst;
 	int i;
 	for(i = 0; i < c->stations->numOfStoreBuffer; i++){
@@ -366,7 +358,7 @@ int canLoadOrStore(CPU c, int index, int add, int opcode){
 	return 1;
 }
 
-int executeReadyLoadStoreInst(CPU c){
+int executeReadyLoadStoreInst(CPU c){//execute if ready RS and can Load or store inst
 	int i = 0, issueCycle, add, indexL, indexS;
 	Instruction loadInst = NULL;
 	Instruction storeInst = NULL;
@@ -415,7 +407,7 @@ int executeReadyLoadStoreInst(CPU c){
 	return 1;
 }
 
-void startExecution(CPU c){
+void startExecution(CPU c){ //get over all RS and check if can execute
 	if(c->add_in_use < c->add_nr_units){
 		//printf("in startExecution - START ADD DEBUG \n");
 		//fflush(NULL);
@@ -429,7 +421,7 @@ void startExecution(CPU c){
 		executeReadyLoadStoreInst(c);
 }
 
-int issueInstruction(CPU c){
+int issueInstruction(CPU c){ //if CPU not halt
 	if(c->halt == 0){
 		int index;
 		Instruction inst = getNonIssuedInstruction(c->queue);
@@ -438,7 +430,7 @@ int issueInstruction(CPU c){
 		if(getOpcode(inst) == HALT){
 			//printf("in issueInstruction - HALT -DEBUG\n");
 			//fflush(NULL);
-			c->halt = 1;
+			c->halt = 1; //CPU Halt!!
 			destroyNode(removeFromNonIssuedQueue(c->queue));
 			return 1;
 		}
@@ -446,14 +438,14 @@ int issueInstruction(CPU c){
 		if(index == -1){
 			return 0;
 		}
-		setIssueCycle(inst, c->cycle);
-		addIssueInstruction(c->queue, removeFromNonIssuedQueue(c->queue));
+		setIssueCycle(inst, c->cycle); 
+		addIssueInstruction(c->queue, removeFromNonIssuedQueue(c->queue)); //move from nonIssuedInst to issueInst
 		insertInstruction(c->stations, index, inst, c->regs);
 	}
 	return 1;
 }
 
-void createRegout(CPU c){
+void createRegout(CPU c){ //create regout output file
 	FILE *fRegout;
 	int i = 0;
 	if(c->regout == NULL){ //check for valid filename
@@ -466,14 +458,13 @@ void createRegout(CPU c){
 	for(i = 0; i< REGISTER_NUM; i++){
 		float f;
 		getValue(c->regs[i], &f);
-		fprintf(fRegout, "%.5f\n", f);
+		fprintf(fRegout, "%.6f\n", f);
 		destroyRegister(c->regs[i]);
 	}
 	fclose(fRegout);
-	//free(c->regs);
 }
 
-void createTraceinst(CPU c){
+void createTraceinst(CPU c){ //create traceinst output file
 	FILE *fTraceinst;
 	if(c->traceInst == NULL){ //check for valid filename
 		return;
@@ -482,17 +473,17 @@ void createTraceinst(CPU c){
 	if(fTraceinst == NULL){ //check if file exist
 			return;
 	}
-	InstructionNode instNode = removeFromIssuedQueue(c->queue);
+	InstructionNode instNode = removeFromIssuedQueue(c->queue); 
 	while(instNode != NULL){
 		Instruction inst = instNode->inst;
 		fprintf(fTraceinst, "%08X %d %s %d %d %d %d\n", inst->instruction, inst->index, getStationName(inst), inst->issueCycle, inst->startExCycle, inst->endExCycle, inst->writeCDBCycle);
-		destroyNode(instNode);
+		destroyNode(instNode); //free node
 		instNode = removeFromIssuedQueue(c->queue);
 	}
 	fclose(fTraceinst);
 }
 
-void destroyCPU(CPU c){
+void destroyCPU(CPU c){ //free all CPU allocations
 	int i;
 	if(c != NULL){
 		destroyReservationStationTable(c->stations);
@@ -503,37 +494,37 @@ void destroyCPU(CPU c){
 
 void runCPU(CPU c){
 	int pc = 0;
-	importMemory(c->memin);
-	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
-		pc++;
+	importMemory(c->memin); //import memory to array
+	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){ //read instruction
+		pc++; //update pc
 	}
-	else{
+	else{ //there is no memin
 		return;
 	}
-	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
-		pc++;
+	if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){//read instruction
+		pc++;//update pc
 	}
-	while(c->done == 0){
+	while(c->done == 0){ 
 		c->cycle++;
-		issueInstruction(c);
+		issueInstruction(c); //issue 2 instruction if can
 		issueInstruction(c);
 		if(c->halt == 0){
-			if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
-				pc++;
+			if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){ //read instruction
+				pc++;//update pc
 			}
-			if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){
-				pc++;
+			if(addInstruction(c->queue, pc, getMemoryInstruction(pc))){//read instruction
+				pc++;//update pc
 			}
 		}
 
-		startExecution(c);
-		writeCDB(c);
+		startExecution(c); //execute instruction if they are ready and threre is functionaluty station
+		writeCDB(c); //write to cdb if needed
 
 	}
 	printf("in runCPU- after while- DEBUG 2\n");
 	fflush(NULL);
 
-	exportMemory(c->memout);
+	exportMemory(c->memout); //create output files
 	createRegout(c);
 	createTraceinst(c);
 

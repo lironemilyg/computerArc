@@ -14,9 +14,9 @@
 #define MEMORY_SIZE 4096
 #define BUFF_SIZE 8
 
-float mem[MEMORY_SIZE];
+float mem[MEMORY_SIZE]; //memory array
 
-int importMemory(char* filename){
+int importMemory(char* filename){ //import memory from file to array
 	FILE *fMem;
 	int nRead = 0;
 	unsigned int num;
@@ -50,7 +50,7 @@ int importMemory(char* filename){
 	return 1;
 }
 
-int exportMemory(char* filename){
+int exportMemory(char* filename){ //export memory array to file
 	FILE *fMem;
 	int i = 0;
 	if(filename == NULL){ //check for valid filename
@@ -70,7 +70,8 @@ int exportMemory(char* filename){
 	return 1;
 }
 
-float getMemoryI(int i){
+//getters and setters
+float getMemoryI(int i){ 
 	return mem[i];
 }
 

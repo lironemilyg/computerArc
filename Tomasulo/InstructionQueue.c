@@ -9,22 +9,22 @@
 #include "Instruction.c"
 #define MAX_INST_QUEUE 16
 #define HALT 6
-typedef struct instructionNode{
+typedef struct instructionNode{ //instruction node
 	Instruction inst;
 	struct instructionNode* next;
 	struct instructionNode* prev;
 }*InstructionNode;
 
-typedef struct instructionQueue{
-	InstructionNode nonIssueInsts;
-	InstructionNode issueInsts;
+typedef struct instructionQueue{ //instruction quque
+	InstructionNode nonIssueInsts; //non issue inst queue
+	InstructionNode issueInsts;// issue inst queue
 	InstructionNode nonIssueInstsTail;
 	InstructionNode issueInstsTail;
 	int nonIssueSize;
 	int issueSize;
 }*InstructionQueue;
 
-InstructionQueue initInstructionQueue(){
+InstructionQueue initInstructionQueue(){ //init
 	InstructionQueue queue = (InstructionQueue)malloc(sizeof(InstructionNode*)*4096);
 	if(queue == NULL)
 		return queue;
@@ -33,7 +33,7 @@ InstructionQueue initInstructionQueue(){
 	return queue;
 }
 
-int addInstruction(InstructionQueue q, int index, int instFromMem){
+int addInstruction(InstructionQueue q, int index, int instFromMem){ //add inst to non issue inst queue
 	if(q->nonIssueSize >= MAX_INST_QUEUE)
 		return 0;
 	q->nonIssueSize++;
@@ -62,7 +62,7 @@ int addInstruction(InstructionQueue q, int index, int instFromMem){
 	return 1;
 }
 
-int addIssueInstruction(InstructionQueue q, InstructionNode in){
+int addIssueInstruction(InstructionQueue q, InstructionNode in){//add inst to issue inst queue and remove it from non issue queue
 	//printf("in addIssueInstruction  -  %08X - DEBUG\n", in->inst->instruction);
 	////fflush(NULL);
 	q->issueSize++;

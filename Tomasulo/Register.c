@@ -10,13 +10,13 @@
 #include <stddef.h>
 #include <string.h>
 
-typedef struct reg{
+typedef struct reg{ //Register fields
 	float val;
 	int rValid;
 	char* tag;
 }*Register;
 
-Register initRegister(int index){
+Register initRegister(int index){ //init Reg with value
 	Register r = (Register)malloc(sizeof(Register*) + 8);
 	if(r == NULL)
 		return r;
@@ -26,7 +26,7 @@ Register initRegister(int index){
 	return r;
 }
 
-void destroyRegister(Register r){
+void destroyRegister(Register r){ //destroy Register
 	if(r != NULL){
 		if(r->tag != NULL){
 			free(r->tag);
@@ -34,6 +34,7 @@ void destroyRegister(Register r){
 	}
 }
 
+//getters and setters
 int isValid(Register r){
 	if(r != NULL){
 		return r->rValid;

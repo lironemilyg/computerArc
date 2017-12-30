@@ -10,7 +10,7 @@
 #include "InstructionQueue.c"
 
 #define MAX_STRING 1000;
-typedef struct station{
+typedef struct station{ //RS fileds
 	char* name;
 	int index;
 	int busy;
@@ -27,7 +27,7 @@ typedef struct station{
 }*ReservationStation;
 #define MAX_SIZE_STATION_NAME 5
 
-ReservationStation initStation(char* stationName){
+ReservationStation initStation(char* stationName){ //create a station
 	int size = MAX_STRING;
 	ReservationStation rs = (ReservationStation)malloc(sizeof(ReservationStation*) + size);
 	rs->name = (char*)malloc(sizeof(stationName));
@@ -47,7 +47,8 @@ ReservationStation initStation(char* stationName){
 	return rs;
 }
 
-char* getResStationName(ReservationStation r){
+//getters and setters 
+char* getResStationName(ReservationStation r){ 
 	return r->name;
 }
 
@@ -116,7 +117,7 @@ void emptyStation(ReservationStation r){
 	r->RkTagValid = 0;
 }
 
-void updateStation(ReservationStation r, Instruction i){
+void updateStation(ReservationStation r, Instruction i){ //update station according tag
 	//printf("updateStations using Instruction %d - DEBUG\n", i->index);
 	//fflush(NULL);
 	if(strcmp(r->Rjtag,i->stationName) == 0)
@@ -130,7 +131,7 @@ void updateStation(ReservationStation r, Instruction i){
 	}
 }
 
-int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Register k, int imm){
+int fillStation(ReservationStation r, int opIndex, int opcode, Register j, Register k, int imm){ //fill station in new instruction
 	if(!r || r->busy == 1){
 		return -1;
 	}
@@ -173,7 +174,7 @@ int getIndexFromRsStation(ReservationStation r){
 	return r->index;
 }
 
-void destroyReservationStation(ReservationStation r){
+void destroyReservationStation(ReservationStation r){ //destroy and free station
 	if(r != NULL){
 		free(r->Rjtag);
 		free(r->Rktag);

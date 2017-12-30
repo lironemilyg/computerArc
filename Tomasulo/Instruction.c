@@ -32,7 +32,7 @@ void decode(Instruction i, int instruction){
 	i->opcode = instruction & 0xF; // OPCODE
 }
 
-Instruction initInstruction(int index,int instruction){
+Instruction initInstruction(int index,int instruction){ //init
 	Instruction i = (Instruction)malloc(sizeof(Instruction*) + 1000);
 	i->issueCycle = -1;
 	i->startExCycle = -1;
@@ -46,10 +46,12 @@ Instruction initInstruction(int index,int instruction){
 	return i;
 }
 
-void destroyInstruction(Instruction i){
+void destroyInstruction(Instruction i){ //destroy
 	free(i);
 }
 
+
+//getters and setters
 int getIndex(Instruction i){
 	return i->index;
 }
