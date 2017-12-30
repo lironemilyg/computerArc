@@ -165,8 +165,6 @@ CPU initCPU(char* cfg, char* memin, char* memout, char* regout, char* traceInst,
 }
 
 void writeToTraceCDB(FILE *fTraceCDB, InstructionNode in, int cycle, char * CDBName){ //helper function - write to traceCDB
-	printf( " in trace CDB %d %d %s %.5f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
-	fflush(NULL);
 	fprintf(fTraceCDB, "%d %d %s %.5f %s\n", cycle, in->inst->index, CDBName, getResult(in->inst), getStationName(in->inst));
 }
 
