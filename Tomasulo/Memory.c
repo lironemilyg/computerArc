@@ -24,7 +24,7 @@ int importMemory(char* filename){
     int memIndex = 0;
     size_t buff_size = BUFF_SIZE+1;
 	char* memLine = (char*)malloc(sizeof(char)*buff_size);
-	char* hexStr = (char*)malloc(sizeof(char)*(buff_size+2));
+	char* hexStr = (char*)malloc(sizeof(char)*(buff_size+3));
 	if(filename == NULL){  //check for valid filename
 		return 0;
 	}
