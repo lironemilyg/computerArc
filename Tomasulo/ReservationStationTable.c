@@ -245,6 +245,11 @@ void destroyReservationStationTable(ReservationStationTable rst){
 		for(j = 0; j < rst->numOfStoreBuffer; j++){
 			destroyReservationStation(rst->storeBuffer[j]);
 		}
+		free(rst->addStations);
+		free(rst->mulStations);
+		free(rst->divStations);
+		free(rst->loadBuffer);
+		free(rst->storeBuffer);
 		free(rst);
 	}
 }
