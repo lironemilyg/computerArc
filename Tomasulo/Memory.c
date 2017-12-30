@@ -22,7 +22,7 @@ int importMemory(char* filename){
 	unsigned int num;
     float f;
     int memIndex = 0;
-    size_t buff_size = BUFF_SIZE;
+    size_t buff_size = BUFF_SIZE+1;
 	char* memLine = (char*)malloc(sizeof(char)*buff_size);
 	char* hexStr = (char*)malloc(sizeof(char)*(buff_size+2));
 	if(filename == NULL){  //check for valid filename
@@ -37,7 +37,7 @@ int importMemory(char* filename){
 	}
 	while ((nRead = getline(&memLine, &buff_size, fMem)) != -1) {
 		strncpy(hexStr,"0x",3);
-		memLine[buff_size] = '\0';
+		memLine[buff_size -1] = '\0';
 		strcat(hexStr,memLine);
 		sscanf(hexStr, "%x", &num);  // assuming you checked input
 		f = *((float*)&num);
