@@ -26,6 +26,7 @@ typedef struct station{
 	int imm;
 }*ReservationStation;
 #define MAX_SIZE_STATION_NAME 5
+
 ReservationStation initStation(char* stationName){
 	int size = MAX_STRING;
 	ReservationStation rs = (ReservationStation)malloc(sizeof(ReservationStation*) + size);
@@ -35,9 +36,9 @@ ReservationStation initStation(char* stationName){
 	rs->ready = 0;
 	rs->opcode = -1;
 	rs->Rjtag = (char*)malloc(MAX_SIZE_STATION_NAME);
-	memset(rs->Rjtag,0,MAX_SIZE_STATION_NAME);
+	memset(rs->Rjtag,'\0',MAX_SIZE_STATION_NAME);
 	rs->Rktag = (char*)malloc(MAX_SIZE_STATION_NAME);
-	memset(rs->Rjtag,0,MAX_SIZE_STATION_NAME);
+	memset(rs->Rjtag,'\0',MAX_SIZE_STATION_NAME);
 	rs->RjTagValid = 0;
 	rs->RkTagValid = 0;
 	return rs;
