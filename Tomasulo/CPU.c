@@ -196,7 +196,6 @@ void writeCDB(CPU c){
 					break;
 				case ST:
 					writeToTraceCDB(fTraceCDB, in, c->cycle, "MEM");
-					setMemoryI(getImm(in->inst), getResult(in->inst));
 					c->mem_in_use--;
 					break;
 				case ADD:
@@ -238,6 +237,7 @@ void execute(CPU c, Instruction i,float Vj, float Vk){ // execute instruction ac
 			c->write_cdb_mem = max(c->cycle + c->mem_delay, c->write_cdb_mem + 1);
 			setWriteCDBCycle(i, c->write_cdb_mem);
 			setResult(i,Vk);
+			setMemoryI(getImm(i), Vk);
 			break;
 		case ADD:
 			c->add_in_use++;
