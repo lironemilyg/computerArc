@@ -195,7 +195,7 @@ void writeCDB(CPU c){
 					c->mem_in_use--;
 					break;
 				case ST:
-					writeToTraceCDB(fTraceCDB, in, c->cycle, "MEM");
+					setWriteCDBCycle(in->inst,-1);
 					c->mem_in_use--;
 					break;
 				case ADD:
